@@ -1,0 +1,7 @@
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\bin\Release\ModbusTCP.XML
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\bin\Release\ModbusTCP.dll
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\bin\Release\ModbusTCP.pdb
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.csproj.CoreCompileInputs.cache
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.dll
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.pdb
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.csprojAssemblyReference.cache

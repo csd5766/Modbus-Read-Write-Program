@@ -1,0 +1,13 @@
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\bin\Debug\ModbusTester.exe
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\bin\Debug\ModbusTester.pdb
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\bin\Debug\ModbusTCP.dll
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\bin\Debug\ModbusTCP.pdb
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\bin\Debug\ModbusTCP.xml
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\ModbusTester.csprojAssemblyReference.cache
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\Modbus.frmStart.resources
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\ModbusTester.csproj.GenerateResource.cache
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\ModbusTester.csproj.CoreCompileInputs.cache
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\ModbusTester.csproj.CopyComplete
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\ModbusTester.exe
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\ModbusTester.pdb
+D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Debug\ModbusTester.LoginForm.resources
