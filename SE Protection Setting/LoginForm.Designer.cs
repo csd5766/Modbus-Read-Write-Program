@@ -38,7 +38,6 @@
             this.logintxt.Name = "logintxt";
             this.logintxt.Size = new System.Drawing.Size(100, 21);
             this.logintxt.TabIndex = 0;
-           
             // 
             // loginbtn
             // 
@@ -46,7 +45,7 @@
             this.loginbtn.Name = "loginbtn";
             this.loginbtn.Size = new System.Drawing.Size(100, 23);
             this.loginbtn.TabIndex = 1;
-            this.loginbtn.Text = "button1";
+            this.loginbtn.Text = "확인";
             this.loginbtn.UseVisualStyleBackColor = true;
             this.loginbtn.Click += new System.EventHandler(this.loginbtn_Click);
             // 

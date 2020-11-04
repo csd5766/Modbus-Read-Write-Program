@@ -25,14 +25,10 @@ namespace Modbus
 
 		
 		public System.Windows.Forms.GroupBox grpData;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button btnConnect;
-		private System.Windows.Forms.TextBox txtIP;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.TextBox txtSize;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.TextBox txtStartAdress;
-		private System.Windows.Forms.GroupBox grpStart;
 		private System.Windows.Forms.GroupBox grpExchange;
 		private System.Windows.Forms.Button btnReadHoldReg;
 		private System.Windows.Forms.GroupBox groupBox1;
@@ -40,8 +36,6 @@ namespace Modbus
 		private System.Windows.Forms.RadioButton radBytes;
 		private System.Windows.Forms.RadioButton radWord;
         private System.Windows.Forms.Button btnWriteMultipleReg;
-		private System.Windows.Forms.Button addrBtn;
-		private System.Windows.Forms.Button loginBtn;
 		private Label label4;
         private TextBox txtUnit;
         private System.ComponentModel.IContainer components;
@@ -49,7 +43,8 @@ namespace Modbus
 		private int flag = 0;
 
 		private string[] AddrList = new string[51];
-		public string
+        #region inifile 변수
+        public string
 			REV_ONOFF,
 			Delay_Threshold,
 			Delay_Time,
@@ -102,9 +97,26 @@ namespace Modbus
 			Har_FREQ,
 			Har_DISPAY,
 			Har_DISPAY_Voltage;
+        #endregion
 
-       
-       
+        private TextBox txtIP;
+        private Button btnConnect;
+        private Label label1;
+        private Button addrBtn;
+        private Button loginBtn;
+        private Label iplabel;
+        private GroupBox grpStart;
+        private Label label6;
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+			for (int i = 0; i < 51; i++)
+            {
+				string name = i + "txt" + ".Text";
+				name = string.Empty;
+			}
+        }
+        private int loginFlag = 0;
 
 
         public frmStart()
@@ -132,13 +144,8 @@ namespace Modbus
 		private void InitializeComponent()
 		{
             this.grpData = new System.Windows.Forms.GroupBox();
-            this.grpStart = new System.Windows.Forms.GroupBox();
-            this.loginBtn = new System.Windows.Forms.Button();
-            this.addrBtn = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.btnConnect = new System.Windows.Forms.Button();
-            this.txtIP = new System.Windows.Forms.TextBox();
             this.grpExchange = new System.Windows.Forms.GroupBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.txtUnit = new System.Windows.Forms.TextBox();
             this.btnWriteMultipleReg = new System.Windows.Forms.Button();
@@ -151,9 +158,16 @@ namespace Modbus
             this.txtSize = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.txtStartAdress = new System.Windows.Forms.TextBox();
-            this.grpStart.SuspendLayout();
+            this.txtIP = new System.Windows.Forms.TextBox();
+            this.btnConnect = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.addrBtn = new System.Windows.Forms.Button();
+            this.loginBtn = new System.Windows.Forms.Button();
+            this.iplabel = new System.Windows.Forms.Label();
+            this.grpStart = new System.Windows.Forms.GroupBox();
             this.grpExchange.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.grpStart.SuspendLayout();
             this.SuspendLayout();
             // 
             // grpData
@@ -170,70 +184,11 @@ namespace Modbus
             this.grpData.Text = "Data";
             this.grpData.Visible = false;
             // 
-            // grpStart
-            // 
-            this.grpStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.grpStart.Controls.Add(this.loginBtn);
-            this.grpStart.Controls.Add(this.addrBtn);
-            this.grpStart.Controls.Add(this.label1);
-            this.grpStart.Controls.Add(this.btnConnect);
-            this.grpStart.Controls.Add(this.txtIP);
-            this.grpStart.Location = new System.Drawing.Point(8, 7);
-            this.grpStart.Name = "grpStart";
-            this.grpStart.Size = new System.Drawing.Size(813, 60);
-            this.grpStart.TabIndex = 11;
-            this.grpStart.TabStop = false;
-            this.grpStart.Text = "Start communication";
-            // 
-            // loginBtn
-            // 
-            this.loginBtn.Location = new System.Drawing.Point(645, 23);
-            this.loginBtn.Name = "loginBtn";
-            this.loginBtn.Size = new System.Drawing.Size(104, 31);
-            this.loginBtn.TabIndex = 10;
-            this.loginBtn.Text = "Admin Login";
-            this.loginBtn.Click += new System.EventHandler(this.loginBtn_Click);
-            // 
-            // addrBtn
-            // 
-            this.addrBtn.Location = new System.Drawing.Point(355, 23);
-            this.addrBtn.Name = "addrBtn";
-            this.addrBtn.Size = new System.Drawing.Size(104, 31);
-            this.addrBtn.TabIndex = 9;
-            this.addrBtn.Text = "AddrLoad";
-            this.addrBtn.Click += new System.EventHandler(this.readBtn_Click);
-            // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(16, 30);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(88, 15);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "IP Address";
-            // 
-            // btnConnect
-            // 
-            this.btnConnect.Location = new System.Drawing.Point(224, 22);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(104, 31);
-            this.btnConnect.TabIndex = 6;
-            this.btnConnect.Text = "Connect";
-            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
-            // 
-            // txtIP
-            // 
-            this.txtIP.Location = new System.Drawing.Point(112, 27);
-            this.txtIP.Name = "txtIP";
-            this.txtIP.Size = new System.Drawing.Size(104, 21);
-            this.txtIP.TabIndex = 5;
-            this.txtIP.Text = "192.168.100.1";
-            this.txtIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
             // grpExchange
             // 
             this.grpExchange.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpExchange.Controls.Add(this.label6);
             this.grpExchange.Controls.Add(this.label4);
             this.grpExchange.Controls.Add(this.txtUnit);
             this.grpExchange.Controls.Add(this.btnWriteMultipleReg);
@@ -250,6 +205,15 @@ namespace Modbus
             this.grpExchange.TabStop = false;
             this.grpExchange.Text = "Data exhange";
             this.grpExchange.Visible = false;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(591, -37);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(38, 12);
+            this.label6.TabIndex = 26;
+            this.label6.Text = "label6";
             // 
             // label4
             // 
@@ -359,6 +323,77 @@ namespace Modbus
             this.txtStartAdress.Text = "0";
             this.txtStartAdress.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
+            // txtIP
+            // 
+            this.txtIP.Location = new System.Drawing.Point(112, 27);
+            this.txtIP.Name = "txtIP";
+            this.txtIP.Size = new System.Drawing.Size(104, 21);
+            this.txtIP.TabIndex = 5;
+            this.txtIP.Text = "192.168.100.1";
+            this.txtIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // btnConnect
+            // 
+            this.btnConnect.Location = new System.Drawing.Point(224, 22);
+            this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Size = new System.Drawing.Size(104, 31);
+            this.btnConnect.TabIndex = 6;
+            this.btnConnect.Text = "Connect";
+            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(16, 30);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(88, 15);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "IP Address";
+            // 
+            // addrBtn
+            // 
+            this.addrBtn.Location = new System.Drawing.Point(355, 23);
+            this.addrBtn.Name = "addrBtn";
+            this.addrBtn.Size = new System.Drawing.Size(104, 31);
+            this.addrBtn.TabIndex = 9;
+            this.addrBtn.Text = "AddrLoad";
+            this.addrBtn.Click += new System.EventHandler(this.readBtn_Click);
+            // 
+            // loginBtn
+            // 
+            this.loginBtn.Location = new System.Drawing.Point(470, 23);
+            this.loginBtn.Name = "loginBtn";
+            this.loginBtn.Size = new System.Drawing.Size(104, 31);
+            this.loginBtn.TabIndex = 10;
+            this.loginBtn.Text = "Admin Login";
+            this.loginBtn.Click += new System.EventHandler(this.loginBtn_Click);
+            // 
+            // iplabel
+            // 
+            this.iplabel.AutoSize = true;
+            this.iplabel.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.iplabel.ForeColor = System.Drawing.Color.Red;
+            this.iplabel.Location = new System.Drawing.Point(584, 29);
+            this.iplabel.Name = "iplabel";
+            this.iplabel.Size = new System.Drawing.Size(0, 16);
+            this.iplabel.TabIndex = 12;
+            // 
+            // grpStart
+            // 
+            this.grpStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpStart.Controls.Add(this.iplabel);
+            this.grpStart.Controls.Add(this.loginBtn);
+            this.grpStart.Controls.Add(this.addrBtn);
+            this.grpStart.Controls.Add(this.label1);
+            this.grpStart.Controls.Add(this.btnConnect);
+            this.grpStart.Controls.Add(this.txtIP);
+            this.grpStart.Location = new System.Drawing.Point(8, 7);
+            this.grpStart.Name = "grpStart";
+            this.grpStart.Size = new System.Drawing.Size(813, 60);
+            this.grpStart.TabIndex = 11;
+            this.grpStart.TabStop = false;
+            this.grpStart.Text = "Start communication";
+            // 
             // frmStart
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
@@ -371,11 +406,11 @@ namespace Modbus
             this.Closing += new System.ComponentModel.CancelEventHandler(this.frmStart_Closing);
             this.Load += new System.EventHandler(this.frmStart_Load);
             this.SizeChanged += new System.EventHandler(this.frmStart_Resize);
-            this.grpStart.ResumeLayout(false);
-            this.grpStart.PerformLayout();
             this.grpExchange.ResumeLayout(false);
             this.grpExchange.PerformLayout();
             this.groupBox1.ResumeLayout(false);
+            this.grpStart.ResumeLayout(false);
+            this.grpStart.PerformLayout();
             this.ResumeLayout(false);
 
 		}
@@ -487,8 +522,6 @@ namespace Modbus
 			//Har_DISPAY = GetIniValue(txtIP.Text, "Har_DISPAY", FilePath);
 			//Har_DISPAY_Voltage = GetIniValue(txtIP.Text, "Har_DISPAY_Voltage", FilePath);
 			#endregion test 
-
-			Console.WriteLine("1");
 			AddrList[0] = GetIniValue(txtIP.Text, "REV_ONOFF", FilePath);
 			AddrList[1] = GetIniValue(txtIP.Text, "Delay_Threshold", FilePath);
 			AddrList[2] = GetIniValue(txtIP.Text, "Delay_Time", FilePath);
@@ -557,6 +590,9 @@ namespace Modbus
 				grpData.Visible			= true;
 				MessageBox.Show("연결 성공");
 				flag = 1;
+				//loginFlag = 0;
+				iplabel.Text = "IP Status :"+ txtIP.Text;
+				iplabel.Visible = true;
 
 			}
 			catch(SystemException error)
@@ -565,7 +601,9 @@ namespace Modbus
 			}
 		}
 
-
+		// ------------------------------------------------------------------------
+		// Athentification 
+		// ------------------------------------------------------------------------
 		private void loginBtn_Click(object sender, EventArgs e)
 		{
 
@@ -582,12 +620,17 @@ namespace Modbus
 				//data = GetData(1);
 				singleData[0] = 30;
 				singleData[1] = 125;
-				txtSize.Text = "1";
-				txtData.Text = data[0].ToString();
+				//txtSize.Text = "1";
+				//txtData.Text = data[0].ToString();
 
+				loginFlag = 1;
 				MBmaster.WriteSingleRegister(ID, unit, StartAddress, singleData);
 			}
 		}
+
+		// ------------------------------------------------------------------------
+		// Read iniFile
+		// ------------------------------------------------------------------------ 
 		private void readBtn_Click(object sender, EventArgs e)
 		{
 			if(flag == 1)
@@ -610,7 +653,7 @@ namespace Modbus
             byte unit           = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
 			UInt16 Length		= Convert.ToUInt16(txtSize.Text);
-
+            
 			MBmaster.ReadHoldingRegister(ID, unit, StartAddress, Length);		
 		}
 		// ------------------------------------------------------------------------
@@ -618,11 +661,7 @@ namespace Modbus
 		// ------------------------------------------------------------------------	
 		private void btnWriteMultipleReg_Click(object sender, System.EventArgs e)
 		{
-			LoginForm dlg = new LoginForm();
-			DialogResult Result = dlg.ShowDialog();
-
-
-			if (Result == DialogResult.OK)
+			if (loginFlag == 1)
             {
 				ushort ID = 8;
 				byte unit = Convert.ToByte(txtUnit.Text);
@@ -742,7 +781,7 @@ namespace Modbus
 				txtData.Tag			= x;
 				txtData.Name = x + "txt";
 
-				if(x < AddrList.Length)
+				if(x < AddrList.Length && loginFlag == 1)
 				txtData.Text = AddrList[x];
 
 				x++;
