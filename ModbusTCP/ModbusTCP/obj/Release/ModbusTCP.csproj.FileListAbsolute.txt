@@ -5,3 +5,10 @@ D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Re
 D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.dll
 D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.pdb
 D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.csprojAssemblyReference.cache
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\ModbusTCP\ModbusTCP\bin\Release\ModbusTCP.XML
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\ModbusTCP\ModbusTCP\bin\Release\ModbusTCP.dll
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\ModbusTCP\ModbusTCP\bin\Release\ModbusTCP.pdb
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.csproj.CoreCompileInputs.cache
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.dll
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.pdb
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\ModbusTCP\ModbusTCP\obj\Release\ModbusTCP.csprojAssemblyReference.cache

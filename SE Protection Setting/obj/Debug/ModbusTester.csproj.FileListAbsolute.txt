@@ -24,3 +24,5 @@ D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Debug
 D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Debug\ModbusTester.csproj.CopyComplete
 D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Debug\ModbusTester.exe
 D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Debug\ModbusTester.pdb
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Debug\ModbusTester.Properties.Resources.resources
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Debug\Modbus.WriteRegister.resources

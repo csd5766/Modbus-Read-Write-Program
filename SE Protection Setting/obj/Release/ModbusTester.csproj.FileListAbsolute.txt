@@ -8,3 +8,16 @@ D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Rel
 D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Release\ModbusTester.csproj.CoreCompileInputs.cache
 D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Release\ModbusTester.csproj.CopyComplete
 D:\C#\modbusTCP-DotNET-master\modbusTCP-DotNET-master\ModbusSampleCommon\obj\Release\ModbusTester.exe
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\bin\Release\ModbusTester.exe
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\bin\Release\ModbusTCP.dll
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\bin\Release\ModbusTCP.pdb
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\bin\Release\ModbusTCP.xml
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\ModbusTester.csprojAssemblyReference.cache
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\Modbus.frmStart.resources
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\ModbusTester.LoginForm.resources
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\ModbusTester.csproj.GenerateResource.cache
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\ModbusTester.csproj.CoreCompileInputs.cache
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\ModbusTester.csproj.CopyComplete
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\ModbusTester.exe
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\ModbusTester.Properties.Resources.resources
+D:\C#\SESettingProgram\Modbus-Read-Write-Program\SE Protection Setting\obj\Release\Modbus.WriteRegister.resources

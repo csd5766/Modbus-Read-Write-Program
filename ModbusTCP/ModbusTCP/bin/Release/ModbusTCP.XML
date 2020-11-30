@@ -90,63 +90,12 @@
             <param name="port">Port number of modbus slave. Usually port 502 is used.</param>
             <param name="no_sync_connection">Disable sencond connection for synchronous requests</param>
         </member>
-        <member name="M:ModbusTCP.Master.ReadCoils(System.UInt16,System.Byte,System.UInt16,System.UInt16)">
-            <summary>Read coils from slave asynchronous. The result is given in the response function.</summary>
-            <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
-            <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
-            <param name="startAddress">Address from where the data read begins.</param>
-            <param name="numInputs">Length of data.</param>
-        </member>
-        <member name="M:ModbusTCP.Master.ReadCoils(System.UInt16,System.Byte,System.UInt16,System.UInt16,System.Byte[]@)">
-            <summary>Read coils from slave synchronous.</summary>
-            <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
-            <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
-            <param name="startAddress">Address from where the data read begins.</param>
-            <param name="numInputs">Length of data.</param>
-            <param name="values">Contains the result of function.</param>
-        </member>
-        <member name="M:ModbusTCP.Master.ReadDiscreteInputs(System.UInt16,System.Byte,System.UInt16,System.UInt16)">
-            <summary>Read discrete inputs from slave asynchronous. The result is given in the response function.</summary>
-            <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
-            <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
-            <param name="startAddress">Address from where the data read begins.</param>
-            <param name="numInputs">Length of data.</param>
-        </member>
         <member name="M:ModbusTCP.Master.ReadHoldingRegister(System.UInt16,System.Byte,System.UInt16,System.UInt16)">
             <summary>Read holding registers from slave asynchronous. The result is given in the response function.</summary>
             <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
             <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
             <param name="startAddress">Address from where the data read begins.</param>
             <param name="numInputs">Length of data.</param>
-        </member>
-        <member name="M:ModbusTCP.Master.ReadInputRegister(System.UInt16,System.Byte,System.UInt16,System.UInt16)">
-            <summary>Read input registers from slave asynchronous. The result is given in the response function.</summary>
-            <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
-            <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
-            <param name="startAddress">Address from where the data read begins.</param>
-            <param name="numInputs">Length of data.</param>
-        </member>
-        <member name="M:ModbusTCP.Master.WriteSingleCoils(System.UInt16,System.Byte,System.UInt16,System.Boolean)">
-            <summary>Write single coil in slave asynchronous. The result is given in the response function.</summary>
-            <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
-            <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
-            <param name="startAddress">Address from where the data read begins.</param>
-            <param name="OnOff">Specifys if the coil should be switched on or off.</param>
-        </member>
-        <member name="M:ModbusTCP.Master.WriteMultipleCoils(System.UInt16,System.Byte,System.UInt16,System.UInt16,System.Byte[])">
-            <summary>Write multiple coils in slave asynchronous. The result is given in the response function.</summary>
-            <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
-            <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
-            <param name="startAddress">Address from where the data read begins.</param>
-            <param name="numBits">Specifys number of bits.</param>
-            <param name="values">Contains the bit information in byte format.</param>
-        </member>
-        <member name="M:ModbusTCP.Master.WriteSingleRegister(System.UInt16,System.Byte,System.UInt16,System.Byte[])">
-            <summary>Write single register in slave asynchronous. The result is given in the response function.</summary>
-            <param name="id">Unique id that marks the transaction. In asynchonous mode this id is given to the callback function.</param>
-            <param name="unit">Unit identifier (previously slave address). In asynchonous mode this unit is given to the callback function.</param>
-            <param name="startAddress">Address to where the data is written.</param>
-            <param name="values">Contains the register information.</param>
         </member>
         <member name="M:ModbusTCP.Master.WriteMultipleRegister(System.UInt16,System.Byte,System.UInt16,System.Byte[])">
             <summary>Write multiple registers in slave asynchronous. The result is given in the response function.</summary>

@@ -6,6 +6,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Reflection.Emit;
+using System.Threading;
+
 
 /// <summary>
 /// Modbus TCP common driver class. 
@@ -49,6 +51,9 @@ namespace ModbusTCP
         private const byte fctWriteMultipleCoils = 15;
         private const byte fctWriteMultipleRegister = 16;
         private const byte fctReadWriteMultipleRegister = 23;
+       
+
+        
 
         /// <summary>Constant for exception illegal function.</summary>
         public const byte excIllegalFunction = 1;
@@ -77,7 +82,7 @@ namespace ModbusTCP
 
         // ------------------------------------------------------------------------
         // Private declarations
-        private static ushort _timeout = 500;
+        private static ushort _timeout = 100;
         private static ushort _refresh = 10;
         private static bool _connected = false;
         private static bool _no_sync_connection = false;
@@ -87,6 +92,9 @@ namespace ModbusTCP
 
         private Socket tcpSynCl;
         private byte[] tcpSynClBuffer = new byte[2048];
+
+        public int conCount = 0;
+        public int conflag = 0;
 
         // ------------------------------------------------------------------------
         /// <summary>Response data event. This event is called when new data arrives</summary>
@@ -104,7 +112,8 @@ namespace ModbusTCP
         /// <param name="no_sync_connection">Disable second connection for synchronous requests</param>
         public Master(string ip, ushort port, bool no_sync_connection)
         {
-            connect(ip, port, no_sync_connection);
+             bool a = Connect(ip, port, no_sync_connection);
+             
         }
 
         // ------------------------------------------------------------------------
@@ -112,7 +121,7 @@ namespace ModbusTCP
         /// <param name="ip">IP adress of modbus slave.</param>
         /// <param name="port">Port number of modbus slave. Usually port 502 is used.</param>
         /// <param name="no_sync_connection">Disable sencond connection for synchronous requests</param>
-        public void connect(string ip, ushort port, bool no_sync_connection)
+        public bool Connect(string ip, ushort port, bool no_sync_connection)
         {
             try
             {
@@ -126,27 +135,42 @@ namespace ModbusTCP
                 // ----------------------------------------------------------------
                 // Connect asynchronous client
                 tcpAsyCl = new Socket(IPAddress.Parse(ip).AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                tcpAsyCl.Connect(new IPEndPoint(IPAddress.Parse(ip), port));
+                IAsyncResult asyncResult =  tcpAsyCl.BeginConnect(new IPEndPoint(IPAddress.Parse(ip), port),null,null);
+                if (asyncResult.AsyncWaitHandle.WaitOne(1000, false))
+                {
+                    tcpAsyCl.EndConnect(asyncResult);
+                    conflag = 1;
+                    
+                }
+                else
+                {
+                    Console.WriteLine("test");
+                    //throw new Exception(string.Format("{0}:{1}에 연결할111 수 없습니다(Timeout).", IPAddress.Parse(ip), port));
+                }
                 tcpAsyCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, _timeout);
                 tcpAsyCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, _timeout);
                 tcpAsyCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, 1);
+
+              
                 // ----------------------------------------------------------------
                 // Connect synchronous client
-                if (!_no_sync_connection)
-                {
-                    tcpSynCl = new Socket(IPAddress.Parse(ip).AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    tcpSynCl.Connect(new IPEndPoint(IPAddress.Parse(ip), port));
-                    tcpSynCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, _timeout);
-                    tcpSynCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, _timeout);
-                    tcpSynCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, 1);
-                }
-                _connected = true;
+                //if (!_no_sync_connection)
+                //{
+                //    tcpSynCl = new Socket(IPAddress.Parse(ip).AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                //    tcpSynCl.Connect(new IPEndPoint(IPAddress.Parse(ip), port));
+                //    tcpSynCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, _timeout);
+                //    tcpSynCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, _timeout);
+                //    tcpSynCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, 1);
+                //}
+                //_connected = true;
             }
             catch (System.IO.IOException error)
             {
                 _connected = false;
                 throw (error);
             }
+            if (conflag == 1) return true;
+            else return false;
         }
 
         public void Dispose()
@@ -155,22 +179,25 @@ namespace ModbusTCP
             {
                 if (tcpAsyCl.Connected)
                 {
-                    try { tcpAsyCl.Shutdown(SocketShutdown.Both); }
-                    catch { }
+                    //try { tcpAsyCl.Shutdown(SocketShutdown.Both); }
+                    //catch { }
                     tcpAsyCl.Close();
+                    conflag = 0;
                 }
                 tcpAsyCl = null;
             }
-            if (tcpSynCl != null)
-            {
-                if (tcpSynCl.Connected)
-                {
-                    try { tcpSynCl.Shutdown(SocketShutdown.Both); }
-                    catch { }
-                    tcpSynCl.Close();
-                }
-                tcpSynCl = null;
-            }
+            #region 동기 종료 
+            //if (tcpSynCl != null)
+            //{
+            //    if (tcpSynCl.Connected)
+            //    {
+            //        try { tcpSynCl.Shutdown(SocketShutdown.Both); }
+            //        catch { }
+            //        tcpSynCl.Close();
+            //    }
+            //    tcpSynCl = null;
+            //}
+            #endregion
         }
 
         internal void CallException(ushort id, byte unit, byte function, byte exception)
@@ -203,6 +230,7 @@ namespace ModbusTCP
                 return;
             }
             //Console.WriteLine(id +"-"+ unit + "-" + startAddress + "-" + numInputs + "-" + fctReadHoldingRegister + "-" + id);
+
             WriteAsyncData(CreateReadHeader(id, unit, startAddress, numInputs, fctReadHoldingRegister), id);
         }
         // ------------------------------------------------------------------------
@@ -229,6 +257,8 @@ namespace ModbusTCP
             WriteAsyncData(data, id);
         }
 
+
+        #region WriteSingleRegister
         public void WriteSingleRegister(ushort id, byte unit, ushort startAddress, byte[] values)
         {
             if (values.GetUpperBound(0) != 1)
@@ -242,7 +272,7 @@ namespace ModbusTCP
             data[11] = values[1];
             WriteAsyncData(data, id);
         }
-
+        #endregion
         // ------------------------------------------------------------------------
         // Create modbus header for read action
         private byte[] CreateReadHeader(ushort id, byte unit, ushort startAddress, ushort length, byte function)
@@ -304,7 +334,7 @@ namespace ModbusTCP
             {
                 try
                 {
-                    tcpAsyCl.BeginSend(write_data, 0, write_data.Length, SocketFlags.None, new AsyncCallback(OnSend), null);
+                        tcpAsyCl.BeginSend(write_data, 0, write_data.Length, SocketFlags.None, new AsyncCallback(OnSend), null);
                 }
                 catch (SystemException)
                 {
@@ -318,13 +348,20 @@ namespace ModbusTCP
         // Write asynchronous data acknowledge
         private void OnSend(System.IAsyncResult result)
         {
-            Int32 size = tcpAsyCl.EndSend(result);
-            
+            //Int32 size = tcpAsyCl.EndSend(result);
+
             if (result.IsCompleted == false) CallException(0xFFFF, 0xFF, 0xFF, excSendFailt);
-            else tcpAsyCl.BeginReceive(tcpAsyClBuffer, 0, tcpAsyClBuffer.Length, SocketFlags.None, new AsyncCallback(OnReceive), tcpAsyCl);
-            for(int i = 0; i < 100; i++)
+
+            else
             {
-                //Console.WriteLine(tcpAsyClBuffer[i]);
+                try {
+                    tcpAsyCl.BeginReceive(tcpAsyClBuffer, 0, tcpAsyClBuffer.Length, SocketFlags.None, new AsyncCallback(OnReceive), tcpAsyCl);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                    
             }
         }
 
@@ -336,7 +373,7 @@ namespace ModbusTCP
 
             try
             {
-                tcpAsyCl.EndReceive(result);
+                //tcpAsyCl.EndReceive(result);
                 if (result.IsCompleted == false) CallException(0xFF, 0xFF, 0xFF, excExceptionConnectionLost);
             }
             catch (Exception) { }
@@ -352,13 +389,15 @@ namespace ModbusTCP
             {
                 data = new byte[2];
                 Array.Copy(tcpAsyClBuffer, 10, data, 0, 2);
+           
             }
             // ------------------------------------------------------------
             // Read response data
             else
             {
-                data = new byte[tcpAsyClBuffer[8]];
-                Array.Copy(tcpAsyClBuffer, 9, data, 0, tcpAsyClBuffer[8]);
+                    data = new byte[tcpAsyClBuffer[8]];
+                    Array.Copy(tcpAsyClBuffer, 9, data, 0, tcpAsyClBuffer[8]);
+                    //conCount++;
             }
             // ------------------------------------------------------------
             // Response data is slave exception
@@ -369,58 +408,64 @@ namespace ModbusTCP
             }
             // ------------------------------------------------------------
             // Response data is regular data
-            else if (OnResponseData != null) OnResponseData(id, unit, function, data);
+            else if (OnResponseData != null)
+            {
+                    OnResponseData(id, unit, function, data);   
+            }
         }
 
+
+        #region 동기 방식 연결
         // ------------------------------------------------------------------------
         // Write data and and wait for response
-        private byte[] WriteSyncData(byte[] write_data, ushort id)
-        {
+        //private byte[] WriteSyncData(byte[] write_data, ushort id)
+        //{
 
-            if (tcpSynCl.Connected)
-            {
-                try
-                {
-                    tcpSynCl.Send(write_data, 0, write_data.Length, SocketFlags.None);
-                    int result = tcpSynCl.Receive(tcpSynClBuffer, 0, tcpSynClBuffer.Length, SocketFlags.None);
-                    
-                    byte unit = tcpSynClBuffer[6];
-                    byte function = tcpSynClBuffer[7];
-                    byte[] data;
+        //    if (tcpSynCl.Connected)
+        //    {
+        //        try
+        //        {
+        //            tcpSynCl.Send(write_data, 0, write_data.Length, SocketFlags.None);
+        //            int result = tcpSynCl.Receive(tcpSynClBuffer, 0, tcpSynClBuffer.Length, SocketFlags.None);
 
-                    if (result == 0) CallException(id, unit, write_data[7], excExceptionConnectionLost);
+        //            byte unit = tcpSynClBuffer[6];
+        //            byte function = tcpSynClBuffer[7];
+        //            byte[] data;
 
-                    // ------------------------------------------------------------
-                    // Response data is slave exception
-                    if (function > excExceptionOffset)
-                    {
-                        function -= excExceptionOffset;
-                        CallException(id, unit, function, tcpSynClBuffer[8]);
-                        return null;
-                    }
-                    // ------------------------------------------------------------
-                    // Write response data
-                    else if ((function >= fctWriteSingleCoil) && (function != fctReadWriteMultipleRegister))
-                    {
-                        data = new byte[2];
-                        Array.Copy(tcpSynClBuffer, 10, data, 0, 2);
-                    }
-                    // ------------------------------------------------------------
-                    // Read response data
-                    else
-                    {
-                        data = new byte[tcpSynClBuffer[8]];
-                        Array.Copy(tcpSynClBuffer, 9, data, 0, tcpSynClBuffer[8]);
-                    }
-                    return data;
-                }
-                catch (SystemException)
-                {
-                    CallException(id, write_data[6], write_data[7], excExceptionConnectionLost);
-                }
-            }
-            else CallException(id, write_data[6], write_data[7], excExceptionConnectionLost);
-            return null;
-        }
+        //            if (result == 0) CallException(id, unit, write_data[7], excExceptionConnectionLost);
+
+        //            // ------------------------------------------------------------
+        //            // Response data is slave exception
+        //            if (function > excExceptionOffset)
+        //            {
+        //                function -= excExceptionOffset;
+        //                CallException(id, unit, function, tcpSynClBuffer[8]);
+        //                return null;
+        //            }
+        //            // ------------------------------------------------------------
+        //            // Write response data
+        //            else if ((function >= fctWriteSingleCoil) && (function != fctReadWriteMultipleRegister))
+        //            {
+        //                data = new byte[2];
+        //                Array.Copy(tcpSynClBuffer, 10, data, 0, 2);
+        //            }
+        //            // ------------------------------------------------------------
+        //            // Read response data
+        //            else
+        //            {
+        //                data = new byte[tcpSynClBuffer[8]];
+        //                Array.Copy(tcpSynClBuffer, 9, data, 0, tcpSynClBuffer[8]);
+        //            }
+        //            return data;
+        //        }
+        //        catch (SystemException)
+        //        {
+        //            CallException(id, write_data[6], write_data[7], excExceptionConnectionLost);
+        //        }
+        //    }
+        //    else CallException(id, write_data[6], write_data[7], excExceptionConnectionLost);
+        //    return null;
+        //}
     }
 }
+#endregion

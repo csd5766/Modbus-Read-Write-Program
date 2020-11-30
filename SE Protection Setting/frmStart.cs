@@ -9,95 +9,201 @@ using ModbusTCP;
 using System.Text;
 using System.Runtime.InteropServices;
 using ModbusTester;
+using System.Threading;
+
 
 namespace Modbus
 {
 
-	public class frmStart : System.Windows.Forms.Form
-	{
-		[DllImport("kernel32")]
-		private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);// ini연동을 위한 선언
+    public class frmStart : System.Windows.Forms.Form
+    {
 
-		private ModbusTCP.Master	MBmaster;
-		private TextBox				txtData;
-		private Label				labData;
-		private byte[]				data;
+        #region ini파일 값 가져올때 씀 
+        [DllImport("kernel32")]
+        private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);// ini연동을 위한 선언
 
-		
-		public System.Windows.Forms.GroupBox grpData;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.TextBox txtSize;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox txtStartAdress;
-		private System.Windows.Forms.GroupBox grpExchange;
-		private System.Windows.Forms.Button btnReadHoldReg;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.RadioButton radBits;
-		private System.Windows.Forms.RadioButton radBytes;
-		private System.Windows.Forms.RadioButton radWord;
+        [DllImport("kernel32.dll")]
+        private static extern uint GetPrivateProfileSectionNames(byte[] IpSections, uint nSize, string IpFileName);
+        #endregion
+
+        private ModbusTCP.Master MBmaster;
+        private TextBox txtData;
+        private Label labData;
+        private byte[] data;
+
+
+        public System.Windows.Forms.GroupBox grpData;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtSize;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtStartAdress;
+        private System.Windows.Forms.GroupBox grpExchange;
+        private System.Windows.Forms.Button btnReadHoldReg;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton radBits;
+        private System.Windows.Forms.RadioButton radBytes;
+        private System.Windows.Forms.RadioButton radWord;
         private System.Windows.Forms.Button btnWriteMultipleReg;
-		private Label label4;
+        private Label label4;
         private TextBox txtUnit;
         private System.ComponentModel.IContainer components;
 
-		private int flag = 0;
+        private int flag = 0;
+        private int runflag = 0;
 
-		private string[] AddrList = new string[51];
+        private string FilePath = "D:\\C#\\SESettingProgram\\Modbus-Read-Write-Program\\c# ini.ini";
+
+        private string[] AddrList = new string[51];
         #region inifile 변수
         public string
-			REV_ONOFF,
-			Delay_Threshold,
-			Delay_Time,
-			OC_Status,
-			OC_ThreShold ,
-			OC_Duration,
-			OC_INV_Threshold,
-			OC_INV_Class,
-			UC_ThreShold,
-			UC_Duration,
-			UC_INV_Threshold,
-			UC_INV_Class,
-			SC_Threshold,
-			SC_Duration,
-			Current_PL_ON_OFF,
-			Current_PL_Duration,
-			Current_UB_Threshold,
-			Current_UB_Duration,
-			STALL_Threshold,
-			STALL_DTIM,
-			JAM_Threshold,
-			JAM_Duration,
-			EF_Threshold,
-			EF_Duration,
-			EF_InEX,
-			EF_CT_Numer,
-			EF_CT_Dennom,
-			CT_Numer,
-			CT_Dennom,
-			Voltage_REV_Rated,
-			Voltage_REV_ONOFF,
-			OV_Threshold,
-			OV_Duration,
-			UV_Threshold,
-			UV_Duration,
-			Voltage_PL_Threshold,
-			Voltage_PL_Duration,
-			Voltage_UB_Threshold,
-			Voltage_UB_Duration,
-			OverFREQ,
-			POWER_RATE,
-			OP_Threshold,
-			OP_Duration,
-			UP_Threshold,
-			UP_Duration,
-			OPF_Threshold,
-			OPF_Duration,
-			UPF_Threshold,
-			UPF_Duration,
-			Har_FREQ,
-			Har_DISPAY,
-			Har_DISPAY_Voltage;
+            REV_ONOFF,
+            Delay_Threshold,
+            Delay_Time,
+            OC_Status,
+            OC_ThreShold,
+            OC_Duration,
+            OC_INV_Threshold,
+            OC_INV_Class,
+            UC_ThreShold,
+            UC_Duration,
+            UC_INV_Threshold,
+            UC_INV_Class,
+            SC_Threshold,
+            SC_Duration,
+            Current_PL_ON_OFF,
+            Current_PL_Duration,
+            Current_UB_Threshold,
+            Current_UB_Duration,
+            STALL_Threshold,
+            STALL_DTIM,
+            JAM_Threshold,
+            JAM_Duration,
+            EF_Threshold,
+            EF_Duration,
+            EF_InEX,
+            EF_CT_Numer,
+            EF_CT_Dennom,
+            CT_Numer,
+            CT_Dennom,
+            Voltage_REV_Rated,
+            Voltage_REV_ONOFF,
+            OV_Threshold,
+            OV_Duration,
+            UV_Threshold,
+            UV_Duration,
+            Voltage_PL_Threshold,
+            Voltage_PL_Duration,
+            Voltage_UB_Threshold,
+            Voltage_UB_Duration,
+            OverFREQ,
+            POWER_RATE,
+            OP_Threshold,
+            OP_Duration,
+            UP_Threshold,
+            UP_Duration,
+            OPF_Threshold,
+            OPF_Duration,
+            UPF_Threshold,
+            UPF_Duration,
+            Har_FREQ,
+            Har_DISPAY,
+            Har_DISPAY_Voltage;
         #endregion
+
+        private void restartBtn_Click(object sender, EventArgs e) // Device Restart 버튼 
+        {
+            try
+            {
+                byte[] singleData = new byte[2];
+                ushort ID = 7;
+                byte unit = Convert.ToByte(txtUnit.Text);
+                ushort StartAddress = 1927;
+                //data = GetData(1);
+                singleData[0] = 0;
+                singleData[1] = 1;
+                //txtSize.Text = "1";
+                //txtData.Text = data[0].ToString();
+
+
+                MBmaster.WriteSingleRegister(ID, unit, StartAddress, singleData);
+                btnConnect.Visible = true;
+                btndiscon.Visible = false;
+                stopbtn.Visible = false;
+                btnReadHoldReg.Visible = true;
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+
+            }
+
+        }
+
+        private Button restartBtn;
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (new Thread(new ThreadStart(() =>
+            {
+                try
+                {
+                    var WriteRegister = new WriteRegister();
+                    WriteRegister.Show();
+                    WriteRegister.ShowDialog();
+                }
+                catch (System.Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+            }
+            ))).Start();
+
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btndiscon_Click(object sender, EventArgs e)
+        {
+            MBmaster.Dispose();
+            btnConnect.Visible = true;
+            btndiscon.Visible = false;
+            stopbtn.Visible = false;
+            btnReadHoldReg.Visible = true;
+        }
+
+        private Button btndiscon;
+
+        private void stopbtn_Click(object sender, EventArgs e)
+        {
+            //         try
+            //         {
+            //	MBmaster.Dispose();
+            //}
+            //catch(Exception ex)
+            //         {
+            //	Console.WriteLine(ex);
+            //         }
+
+
+            runflag = 0;
+            stopbtn.Visible = false;
+            btnReadHoldReg.Visible = true;
+
+
+        }
+
+        private Button stopbtn;
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+
+        }
 
         private TextBox txtIP;
         private Button btnConnect;
@@ -106,46 +212,48 @@ namespace Modbus
         private Button loginBtn;
         private Label iplabel;
         private GroupBox grpStart;
-        private Label label6;
+        private PictureBox pictureBox2;
 
         private void button1_Click(object sender, EventArgs e)
         {
-			for (int i = 0; i < 51; i++)
+            for (int i = 0; i < 51; i++)
             {
-				string name = i + "txt" + ".Text";
-				name = string.Empty;
-			}
+                string name = i + "txt" + ".Text";
+                name = string.Empty;
+            }
         }
         private int loginFlag = 0;
 
 
         public frmStart()
-		{
-			InitializeComponent();
-		}
+        {
+            InitializeComponent();
+        }
 
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if (components != null) 
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Vom Windows Form-Designer generierter Code
-		/// <summary>
-		/// Erforderliche Methode für die Designerunterstützung. 
-		/// Der Inhalt der Methode darf nicht mit dem Code-Editor geändert werden.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Vom Windows Form-Designer generierter Code
+        /// <summary>
+        /// Erforderliche Methode für die Designerunterstützung. 
+        /// Der Inhalt der Methode darf nicht mit dem Code-Editor geändert werden.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmStart));
             this.grpData = new System.Windows.Forms.GroupBox();
             this.grpExchange = new System.Windows.Forms.GroupBox();
-            this.label6 = new System.Windows.Forms.Label();
+            this.stopbtn = new System.Windows.Forms.Button();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.txtUnit = new System.Windows.Forms.TextBox();
             this.btnWriteMultipleReg = new System.Windows.Forms.Button();
@@ -165,18 +273,22 @@ namespace Modbus
             this.loginBtn = new System.Windows.Forms.Button();
             this.iplabel = new System.Windows.Forms.Label();
             this.grpStart = new System.Windows.Forms.GroupBox();
+            this.btndiscon = new System.Windows.Forms.Button();
+            this.restartBtn = new System.Windows.Forms.Button();
             this.grpExchange.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.grpStart.SuspendLayout();
             this.SuspendLayout();
             // 
             // grpData
             // 
-            this.grpData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.grpData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grpData.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.grpData.Location = new System.Drawing.Point(8, 215);
+            this.grpData.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.grpData.Location = new System.Drawing.Point(8, 225);
             this.grpData.Name = "grpData";
             this.grpData.Size = new System.Drawing.Size(813, 192);
             this.grpData.TabIndex = 9;
@@ -186,9 +298,10 @@ namespace Modbus
             // 
             // grpExchange
             // 
-            this.grpExchange.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.grpExchange.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.grpExchange.Controls.Add(this.label6);
+            this.grpExchange.Controls.Add(this.stopbtn);
+            this.grpExchange.Controls.Add(this.pictureBox2);
             this.grpExchange.Controls.Add(this.label4);
             this.grpExchange.Controls.Add(this.txtUnit);
             this.grpExchange.Controls.Add(this.btnWriteMultipleReg);
@@ -198,34 +311,53 @@ namespace Modbus
             this.grpExchange.Controls.Add(this.txtSize);
             this.grpExchange.Controls.Add(this.label2);
             this.grpExchange.Controls.Add(this.txtStartAdress);
-            this.grpExchange.Location = new System.Drawing.Point(8, 75);
+            this.grpExchange.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.grpExchange.Location = new System.Drawing.Point(8, 89);
             this.grpExchange.Name = "grpExchange";
             this.grpExchange.Size = new System.Drawing.Size(813, 134);
             this.grpExchange.TabIndex = 12;
             this.grpExchange.TabStop = false;
-            this.grpExchange.Text = "Data exhange";
+            this.grpExchange.Text = "Data Exchange";
             this.grpExchange.Visible = false;
             // 
-            // label6
+            // stopbtn
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(591, -37);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(38, 12);
-            this.label6.TabIndex = 26;
-            this.label6.Text = "label6";
+            this.stopbtn.BackColor = System.Drawing.Color.Red;
+            this.stopbtn.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.stopbtn.Location = new System.Drawing.Point(273, 12);
+            this.stopbtn.Name = "stopbtn";
+            this.stopbtn.Size = new System.Drawing.Size(139, 116);
+            this.stopbtn.TabIndex = 28;
+            this.stopbtn.Text = "Stop";
+            this.stopbtn.UseVisualStyleBackColor = false;
+            this.stopbtn.Visible = false;
+            this.stopbtn.Click += new System.EventHandler(this.stopbtn_Click);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = global::ModbusTester.Properties.Resources.UYeGLogo;
+            this.pictureBox2.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox2.InitialImage")));
+            this.pictureBox2.Location = new System.Drawing.Point(563, 12);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(244, 116);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 27;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Click += new System.EventHandler(this.pictureBox2_Click);
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(16, 29);
+            this.label4.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.label4.Location = new System.Drawing.Point(7, 29);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(88, 15);
+            this.label4.Size = new System.Drawing.Size(70, 15);
             this.label4.TabIndex = 25;
             this.label4.Text = "Unit";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // txtUnit
             // 
-            this.txtUnit.Location = new System.Drawing.Point(104, 27);
+            this.txtUnit.Location = new System.Drawing.Point(85, 27);
             this.txtUnit.Name = "txtUnit";
             this.txtUnit.Size = new System.Drawing.Size(60, 21);
             this.txtUnit.TabIndex = 24;
@@ -234,9 +366,10 @@ namespace Modbus
             // 
             // btnWriteMultipleReg
             // 
-            this.btnWriteMultipleReg.Location = new System.Drawing.Point(559, 12);
+            this.btnWriteMultipleReg.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnWriteMultipleReg.Location = new System.Drawing.Point(418, 12);
             this.btnWriteMultipleReg.Name = "btnWriteMultipleReg";
-            this.btnWriteMultipleReg.Size = new System.Drawing.Size(191, 116);
+            this.btnWriteMultipleReg.Size = new System.Drawing.Size(139, 116);
             this.btnWriteMultipleReg.TabIndex = 23;
             this.btnWriteMultipleReg.Text = "Write multiple register";
             this.btnWriteMultipleReg.Click += new System.EventHandler(this.btnWriteMultipleReg_Click);
@@ -246,7 +379,7 @@ namespace Modbus
             this.groupBox1.Controls.Add(this.radWord);
             this.groupBox1.Controls.Add(this.radBytes);
             this.groupBox1.Controls.Add(this.radBits);
-            this.groupBox1.Location = new System.Drawing.Point(192, 22);
+            this.groupBox1.Location = new System.Drawing.Point(156, 22);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(104, 97);
             this.groupBox1.TabIndex = 20;
@@ -255,6 +388,7 @@ namespace Modbus
             // 
             // radWord
             // 
+            this.radWord.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.radWord.Location = new System.Drawing.Point(16, 67);
             this.radWord.Name = "radWord";
             this.radWord.Size = new System.Drawing.Size(80, 23);
@@ -264,6 +398,7 @@ namespace Modbus
             // 
             // radBytes
             // 
+            this.radBytes.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.radBytes.Location = new System.Drawing.Point(16, 45);
             this.radBytes.Name = "radBytes";
             this.radBytes.Size = new System.Drawing.Size(80, 22);
@@ -273,6 +408,7 @@ namespace Modbus
             // 
             // radBits
             // 
+            this.radBits.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.radBits.Location = new System.Drawing.Point(16, 22);
             this.radBits.Name = "radBits";
             this.radBits.Size = new System.Drawing.Size(80, 23);
@@ -282,24 +418,27 @@ namespace Modbus
             // 
             // btnReadHoldReg
             // 
-            this.btnReadHoldReg.Location = new System.Drawing.Point(355, 12);
+            this.btnReadHoldReg.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnReadHoldReg.Location = new System.Drawing.Point(274, 12);
             this.btnReadHoldReg.Name = "btnReadHoldReg";
-            this.btnReadHoldReg.Size = new System.Drawing.Size(195, 116);
+            this.btnReadHoldReg.Size = new System.Drawing.Size(139, 116);
             this.btnReadHoldReg.TabIndex = 17;
             this.btnReadHoldReg.Text = "Read holding register";
             this.btnReadHoldReg.Click += new System.EventHandler(this.btnReadHoldReg_Click);
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(16, 84);
+            this.label3.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.label3.Location = new System.Drawing.Point(7, 97);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(88, 15);
+            this.label3.Size = new System.Drawing.Size(70, 15);
             this.label3.TabIndex = 15;
             this.label3.Text = "Size";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // txtSize
             // 
-            this.txtSize.Location = new System.Drawing.Point(104, 84);
+            this.txtSize.Location = new System.Drawing.Point(85, 94);
             this.txtSize.Name = "txtSize";
             this.txtSize.Size = new System.Drawing.Size(60, 21);
             this.txtSize.TabIndex = 14;
@@ -308,15 +447,17 @@ namespace Modbus
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(16, 57);
+            this.label2.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.label2.Location = new System.Drawing.Point(7, 63);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(88, 15);
+            this.label2.Size = new System.Drawing.Size(70, 15);
             this.label2.TabIndex = 13;
             this.label2.Text = "Start Adress";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // txtStartAdress
             // 
-            this.txtStartAdress.Location = new System.Drawing.Point(104, 55);
+            this.txtStartAdress.Location = new System.Drawing.Point(85, 61);
             this.txtStartAdress.Name = "txtStartAdress";
             this.txtStartAdress.Size = new System.Drawing.Size(60, 21);
             this.txtStartAdress.TabIndex = 12;
@@ -334,6 +475,7 @@ namespace Modbus
             // 
             // btnConnect
             // 
+            this.btnConnect.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnConnect.Location = new System.Drawing.Point(224, 22);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(104, 31);
@@ -343,6 +485,7 @@ namespace Modbus
             // 
             // label1
             // 
+            this.label1.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label1.Location = new System.Drawing.Point(16, 30);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(88, 15);
@@ -351,6 +494,7 @@ namespace Modbus
             // 
             // addrBtn
             // 
+            this.addrBtn.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.addrBtn.Location = new System.Drawing.Point(355, 23);
             this.addrBtn.Name = "addrBtn";
             this.addrBtn.Size = new System.Drawing.Size(104, 31);
@@ -360,6 +504,7 @@ namespace Modbus
             // 
             // loginBtn
             // 
+            this.loginBtn.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.loginBtn.Location = new System.Drawing.Point(470, 23);
             this.loginBtn.Name = "loginBtn";
             this.loginBtn.Size = new System.Drawing.Size(104, 31);
@@ -372,316 +517,354 @@ namespace Modbus
             this.iplabel.AutoSize = true;
             this.iplabel.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.iplabel.ForeColor = System.Drawing.Color.Red;
-            this.iplabel.Location = new System.Drawing.Point(584, 29);
+            this.iplabel.Location = new System.Drawing.Point(584, -15);
             this.iplabel.Name = "iplabel";
             this.iplabel.Size = new System.Drawing.Size(0, 16);
             this.iplabel.TabIndex = 12;
             // 
             // grpStart
             // 
-            this.grpStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.grpStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpStart.Controls.Add(this.restartBtn);
             this.grpStart.Controls.Add(this.iplabel);
+            this.grpStart.Controls.Add(this.btndiscon);
             this.grpStart.Controls.Add(this.loginBtn);
             this.grpStart.Controls.Add(this.addrBtn);
             this.grpStart.Controls.Add(this.label1);
             this.grpStart.Controls.Add(this.btnConnect);
             this.grpStart.Controls.Add(this.txtIP);
-            this.grpStart.Location = new System.Drawing.Point(8, 7);
+            this.grpStart.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.grpStart.Location = new System.Drawing.Point(8, 25);
             this.grpStart.Name = "grpStart";
             this.grpStart.Size = new System.Drawing.Size(813, 60);
             this.grpStart.TabIndex = 11;
             this.grpStart.TabStop = false;
             this.grpStart.Text = "Start communication";
             // 
+            // btndiscon
+            // 
+            this.btndiscon.BackColor = System.Drawing.Color.Red;
+            this.btndiscon.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btndiscon.Location = new System.Drawing.Point(224, 21);
+            this.btndiscon.Name = "btndiscon";
+            this.btndiscon.Size = new System.Drawing.Size(104, 31);
+            this.btndiscon.TabIndex = 13;
+            this.btndiscon.Text = "DisConnect";
+            this.btndiscon.UseVisualStyleBackColor = false;
+            this.btndiscon.Visible = false;
+            this.btndiscon.Click += new System.EventHandler(this.btndiscon_Click);
+            // 
+            // restartBtn
+            // 
+            this.restartBtn.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.restartBtn.Location = new System.Drawing.Point(583, 23);
+            this.restartBtn.Name = "restartBtn";
+            this.restartBtn.Size = new System.Drawing.Size(131, 31);
+            this.restartBtn.TabIndex = 14;
+            this.restartBtn.Text = "Device Restart";
+            this.restartBtn.Click += new System.EventHandler(this.restartBtn_Click);
+            // 
             // frmStart
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ClientSize = new System.Drawing.Size(833, 419);
             this.Controls.Add(this.grpExchange);
             this.Controls.Add(this.grpStart);
             this.Controls.Add(this.grpData);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmStart";
-            this.Text = "ModbusTCP WriteProgram";
+            this.Text = "UYeGSE Modbus R/W";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.frmStart_Closing);
             this.Load += new System.EventHandler(this.frmStart_Load);
             this.SizeChanged += new System.EventHandler(this.frmStart_Resize);
             this.grpExchange.ResumeLayout(false);
             this.grpExchange.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.grpStart.ResumeLayout(false);
             this.grpStart.PerformLayout();
             this.ResumeLayout(false);
 
-		}
-		#endregion
-
-		[STAThread]
-		static void Main(String[] args)
-		{
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new Modbus.frmStart());
-		}
+        }
+        #endregion
 
 
-		public static string GetIniValue(string Section, string Key, string iniPath)
-		{
-			StringBuilder temp = new StringBuilder(255);
-			int i = GetPrivateProfileString(Section, Key, "NOT VALUE", temp, 255, iniPath);
-			return temp.ToString();
-		}
-
-
-		// ------------------------------------------------------------------------
-		// Programm start
-		// ------------------------------------------------------------------------
-		private void frmStart_Load(object sender, System.EventArgs e)
-		{
-
-			// Set standard format byte, make some textboxes
-			radBytes.Checked = true;
-			txtIP.Text = "192.168.100.31";
-			txtStartAdress.Text = "512";
-			txtSize.Text = "50";
-			data = new byte[0];
-			ResizeData();
-		}
-
-		// ------------------------------------------------------------------------
-		// Programm stop
-		// ------------------------------------------------------------------------
-		private void frmStart_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if(MBmaster != null) 
-			{
-				MBmaster.Dispose();
-				MBmaster = null;
-			}	
-			Application.Exit();
-		}
-
-		// ------------------------------------------------------------------------
-		// ini파일 세팅
-		// ------------------------------------------------------------------------
-
-		private void IniSet(string ip)
+        #region Main
+        [STAThread]
+        static void Main(String[] args)
         {
-			string FilePath = "C:\\Users\\eomjunyong\\Desktop\\c# ini.ini";
-			#region
-			//         REV_ONOFF = GetIniValue(txtIP.Text, "REV_ONOFF", FilePath);
-			//Delay_Threshold = GetIniValue(txtIP.Text, "Delay_Threshold", FilePath);
-			//Delay_Time = GetIniValue(txtIP.Text, "Delay_Time", FilePath);
-			//OC_Status = GetIniValue(txtIP.Text, "OC_Status", FilePath);
-			//OC_ThreShold = GetIniValue(txtIP.Text, "OC_ThreShold", FilePath);
-			//OC_Duration = GetIniValue(txtIP.Text, "OC_Duration", FilePath);
-			//OC_INV_Threshold = GetIniValue(txtIP.Text, "OC_INV_Threshold", FilePath);
-			//OC_INV_Class = GetIniValue(txtIP.Text, "OC_INV_Class", FilePath);
-			//UC_ThreShold = GetIniValue(txtIP.Text, "UC_ThreShold", FilePath);
-			//UC_Duration = GetIniValue(txtIP.Text, "UC_Duration", FilePath);
-			//UC_INV_Threshold = GetIniValue(txtIP.Text, "UC_INV_Threshold", FilePath);
-			//UC_INV_Class = GetIniValue(txtIP.Text, "UC_INV_Class", FilePath);
-			//SC_Threshold = GetIniValue(txtIP.Text, "SC_Threshold", FilePath);
-			//SC_Duration = GetIniValue(txtIP.Text, "SC_Duration", FilePath);
-			//Current_PL_ON_OFF = GetIniValue(txtIP.Text, "Current_PL_ON_OFF", FilePath);
-			//Current_PL_Duration = GetIniValue(txtIP.Text, "Current_PL_Duration", FilePath);
-			//Current_UB_Threshold = GetIniValue(txtIP.Text, "Current_UB_Threshold", FilePath);
-			//Current_UB_Duration = GetIniValue(txtIP.Text, "Current_UB_Duration", FilePath);
-			//STALL_Threshold = GetIniValue(txtIP.Text, "STALL_Threshold", FilePath);
-			//STALL_DTIM = GetIniValue(txtIP.Text, "STALL_DTIM", FilePath);
-			//JAM_Threshold = GetIniValue(txtIP.Text, "JAM_Threshold", FilePath);
-			//JAM_Duration = GetIniValue(txtIP.Text, "JAM_Duration", FilePath);
-			//EF_Threshold = GetIniValue(txtIP.Text, "EF_Threshold", FilePath);
-			//EF_Duration = GetIniValue(txtIP.Text, "EF_Duration", FilePath);
-			//EF_InEX = GetIniValue(txtIP.Text, "EF_InEX", FilePath);
-			//EF_CT_Numer = GetIniValue(txtIP.Text, "EF_CT_Numer", FilePath);
-			//EF_CT_Dennom = GetIniValue(txtIP.Text, "EF_CT_Dennom", FilePath);
-			//CT_Numer = GetIniValue(txtIP.Text, "CT_Numer", FilePath);
-			//CT_Dennom = GetIniValue(txtIP.Text, "CT_Dennom", FilePath);
-			//Voltage_REV_Rated = GetIniValue(txtIP.Text, "Voltage_REV_Rated", FilePath);
-			//Voltage_REV_ONOFF = GetIniValue(txtIP.Text, "Voltage_REV_ONOFF", FilePath);
-			//OV_Threshold = GetIniValue(txtIP.Text, "OV_Threshold", FilePath);
-			//OV_Duration = GetIniValue(txtIP.Text, "OV_Duration", FilePath);
-			//UV_Threshold = GetIniValue(txtIP.Text, "UV_Threshold", FilePath);
-			//UV_Duration = GetIniValue(txtIP.Text, "UV_Duration", FilePath);
-			//Voltage_PL_Threshold = GetIniValue(txtIP.Text, "Voltage_PL_Threshold", FilePath);
-			//Voltage_PL_Duration = GetIniValue(txtIP.Text, "Voltage_PL_Duration", FilePath);
-			//Voltage_UB_Threshold = GetIniValue(txtIP.Text, "Voltage_UB_Threshold", FilePath);
-			//Voltage_UB_Duration = GetIniValue(txtIP.Text, "Voltage_UB_Duration", FilePath);
-			//OverFREQ = GetIniValue(txtIP.Text, "OverFREQ", FilePath);
-			//POWER_RATE = GetIniValue(txtIP.Text, "POWER_RATE", FilePath);
-			//OP_Threshold = GetIniValue(txtIP.Text, "OP_Threshold", FilePath);
-			//OP_Duration = GetIniValue(txtIP.Text, "OP_Duration", FilePath);
-			//UP_Threshold = GetIniValue(txtIP.Text, "UP_Threshold", FilePath);
-			//UP_Duration = GetIniValue(txtIP.Text, "UP_Duration", FilePath);
-			//OPF_Threshold = GetIniValue(txtIP.Text, "OPF_Threshold", FilePath);
-			//OPF_Duration = GetIniValue(txtIP.Text, "OPF_Duration", FilePath);
-			//UPF_Threshold = GetIniValue(txtIP.Text, "UPF_Threshold", FilePath);
-			//UPF_Duration = GetIniValue(txtIP.Text, "UPF_Duration", FilePath);
-			//Har_FREQ = GetIniValue(txtIP.Text, "Har_FREQ", FilePath);
-			//Har_DISPAY = GetIniValue(txtIP.Text, "Har_DISPAY", FilePath);
-			//Har_DISPAY_Voltage = GetIniValue(txtIP.Text, "Har_DISPAY_Voltage", FilePath);
-			#endregion test 
-			AddrList[0] = GetIniValue(txtIP.Text, "REV_ONOFF", FilePath);
-			AddrList[1] = GetIniValue(txtIP.Text, "Delay_Threshold", FilePath);
-			AddrList[2] = GetIniValue(txtIP.Text, "Delay_Time", FilePath);
-			AddrList[3] = GetIniValue(txtIP.Text, "OC_Status", FilePath);
-			AddrList[4] = GetIniValue(txtIP.Text, "OC_ThreShold", FilePath);
-			AddrList[5] = GetIniValue(txtIP.Text, "OC_Duration", FilePath);
-			AddrList[6] = GetIniValue(txtIP.Text, "OC_INV_Threshold", FilePath);
-			AddrList[7] = GetIniValue(txtIP.Text, "OC_INV_Class", FilePath);
-			AddrList[8] = GetIniValue(txtIP.Text, "UC_ThreShold", FilePath);
-			AddrList[9] = GetIniValue(txtIP.Text, "UC_Duration", FilePath);
-			AddrList[10] = GetIniValue(txtIP.Text, "SC_Threshold", FilePath);
-			AddrList[11] = GetIniValue(txtIP.Text, "SC_Duration", FilePath);
-			AddrList[12] = GetIniValue(txtIP.Text, "Current_PL_ON_OFF", FilePath);
-			AddrList[13] = GetIniValue(txtIP.Text, "Current_PL_Duration", FilePath);
-			AddrList[14] = GetIniValue(txtIP.Text, "Current_UB_Threshold", FilePath);
-			AddrList[15] = GetIniValue(txtIP.Text, "Current_UB_Duration", FilePath);
-			AddrList[16] = GetIniValue(txtIP.Text, "STALL_Threshold", FilePath);
-			AddrList[17] = GetIniValue(txtIP.Text, "STALL_DTIM", FilePath);
-			AddrList[18] = GetIniValue(txtIP.Text, "JAM_Threshold", FilePath);
-			AddrList[19] = GetIniValue(txtIP.Text, "JAM_Duration", FilePath);
-			AddrList[20] = GetIniValue(txtIP.Text, "EF_Threshold", FilePath);
-			AddrList[21] = GetIniValue(txtIP.Text, "EF_Duration", FilePath);
-			AddrList[22] = GetIniValue(txtIP.Text, "EF_InEX", FilePath);
-			AddrList[23] = GetIniValue(txtIP.Text, "EF_CT_Numer", FilePath);
-			AddrList[24] = GetIniValue(txtIP.Text, "EF_CT_Dennom", FilePath);
-			AddrList[25] = GetIniValue(txtIP.Text, "CT_Numer", FilePath);
-			AddrList[26] = GetIniValue(txtIP.Text, "CT_Dennom", FilePath);
-			AddrList[27] = GetIniValue(txtIP.Text, "Voltage_REV_Rated", FilePath);
-			AddrList[28] = GetIniValue(txtIP.Text, "Voltage_REV_ONOFF", FilePath);
-			AddrList[29] = GetIniValue(txtIP.Text, "OV_Threshold", FilePath);
-			AddrList[30] = GetIniValue(txtIP.Text, "OV_Duration", FilePath);
-			AddrList[31] = GetIniValue(txtIP.Text, "UV_Threshold", FilePath);
-			AddrList[32] = GetIniValue(txtIP.Text, "UV_Duration", FilePath);
-			AddrList[33] = GetIniValue(txtIP.Text, "Voltage_PL_Threshold", FilePath);
-			AddrList[34] = GetIniValue(txtIP.Text, "Voltage_PL_Duration", FilePath);
-			AddrList[35] = GetIniValue(txtIP.Text, "Voltage_UB_Threshold", FilePath);
-			AddrList[36] = GetIniValue(txtIP.Text, "Voltage_UB_Duration", FilePath);
-			AddrList[37] = GetIniValue(txtIP.Text, "OverFREQ", FilePath);
-			AddrList[38] = GetIniValue(txtIP.Text, "POWER_RATE", FilePath);
-			AddrList[39] = GetIniValue(txtIP.Text, "OP_Threshold", FilePath);
-			AddrList[40] = GetIniValue(txtIP.Text, "OP_Duration", FilePath);
-			AddrList[41] = GetIniValue(txtIP.Text, "UP_Threshold", FilePath);
-			AddrList[42] = GetIniValue(txtIP.Text, "UP_Duration", FilePath);
-			AddrList[43] = GetIniValue(txtIP.Text, "OPF_Threshold", FilePath);
-			AddrList[44] = GetIniValue(txtIP.Text, "OPF_Duration", FilePath);
-			AddrList[45] = GetIniValue(txtIP.Text, "UPF_Threshold", FilePath);
-			AddrList[46] = GetIniValue(txtIP.Text, "UPF_Duration", FilePath);
-			AddrList[47] = GetIniValue(txtIP.Text, "Har_FREQ", FilePath);
-			AddrList[48] = GetIniValue(txtIP.Text, "Har_DISPAY", FilePath);
-			AddrList[49] = GetIniValue(txtIP.Text, "Har_DISPAY_Voltage", FilePath);
-		}
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Modbus.frmStart());
+        }
+        #endregion
+
+
+        private string[] GetIniSectionNames()
+        {
+            byte[] ba = new byte[255];
+            uint Flag = GetPrivateProfileSectionNames(ba, 255, FilePath);
+            return Encoding.Default.GetString(ba).Split(new char[1] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static string GetIniValue(string Section, string Key, string iniPath)
+        {
+            StringBuilder temp = new StringBuilder(255);
+            int i = GetPrivateProfileString(Section, Key, "NOT VALUE", temp, 255, iniPath);
+            return temp.ToString();
+        }
+
+
+        // ------------------------------------------------------------------------
+        // Programm start
+        // ------------------------------------------------------------------------
+        private void frmStart_Load(object sender, System.EventArgs e)
+        {
+
+            // Set standard format byte, make some textboxes
+            radBytes.Checked = true;
+            txtIP.Text = "192.168.100.31";
+            txtStartAdress.Text = "1300";
+            txtSize.Text = "50";
+            data = new byte[0];
+            ResizeData();
+        }
+
+        // ------------------------------------------------------------------------
+        // Programm stop
+        // ------------------------------------------------------------------------
+        private void frmStart_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (MBmaster != null)
+            {
+                MBmaster.Dispose();
+                MBmaster = null;
+            }
+            Application.Exit();
+        }
+
+        // ------------------------------------------------------------------------
+        // ini파일 세팅
+        // ------------------------------------------------------------------------
+
+        private void IniSet(string ip)
+        {
+
+
+            AddrList[0] = GetIniValue(txtIP.Text, "REV_ONOFF", FilePath);
+            AddrList[1] = GetIniValue(txtIP.Text, "Delay_Threshold", FilePath);
+            AddrList[2] = GetIniValue(txtIP.Text, "Delay_Time", FilePath);
+            AddrList[3] = GetIniValue(txtIP.Text, "OC_Status", FilePath);
+            AddrList[4] = GetIniValue(txtIP.Text, "OC_ThreShold", FilePath);
+            AddrList[5] = GetIniValue(txtIP.Text, "OC_Duration", FilePath);
+            AddrList[6] = GetIniValue(txtIP.Text, "OC_INV_Threshold", FilePath);
+            AddrList[7] = GetIniValue(txtIP.Text, "OC_INV_Class", FilePath);
+            AddrList[8] = GetIniValue(txtIP.Text, "UC_ThreShold", FilePath);
+            AddrList[9] = GetIniValue(txtIP.Text, "UC_Duration", FilePath);
+            AddrList[10] = GetIniValue(txtIP.Text, "SC_Threshold", FilePath);
+            AddrList[11] = GetIniValue(txtIP.Text, "SC_Duration", FilePath);
+            AddrList[12] = GetIniValue(txtIP.Text, "Current_PL_ON_OFF", FilePath);
+            AddrList[13] = GetIniValue(txtIP.Text, "Current_PL_Duration", FilePath);
+            AddrList[14] = GetIniValue(txtIP.Text, "Current_UB_Threshold", FilePath);
+            AddrList[15] = GetIniValue(txtIP.Text, "Current_UB_Duration", FilePath);
+            AddrList[16] = GetIniValue(txtIP.Text, "STALL_Threshold", FilePath);
+            AddrList[17] = GetIniValue(txtIP.Text, "STALL_DTIM", FilePath);
+            AddrList[18] = GetIniValue(txtIP.Text, "JAM_Threshold", FilePath);
+            AddrList[19] = GetIniValue(txtIP.Text, "JAM_Duration", FilePath);
+            AddrList[20] = GetIniValue(txtIP.Text, "EF_Threshold", FilePath);
+            AddrList[21] = GetIniValue(txtIP.Text, "EF_Duration", FilePath);
+            AddrList[22] = GetIniValue(txtIP.Text, "EF_InEX", FilePath);
+            AddrList[23] = GetIniValue(txtIP.Text, "EF_CT_Numer", FilePath);
+            AddrList[24] = GetIniValue(txtIP.Text, "EF_CT_Dennom", FilePath);
+            AddrList[25] = GetIniValue(txtIP.Text, "CT_Numer", FilePath);
+            AddrList[26] = GetIniValue(txtIP.Text, "CT_Dennom", FilePath);
+            AddrList[27] = GetIniValue(txtIP.Text, "Voltage_REV_Rated", FilePath);
+            AddrList[28] = GetIniValue(txtIP.Text, "Voltage_REV_ONOFF", FilePath);
+            AddrList[29] = GetIniValue(txtIP.Text, "OV_Threshold", FilePath);
+            AddrList[30] = GetIniValue(txtIP.Text, "OV_Duration", FilePath);
+            AddrList[31] = GetIniValue(txtIP.Text, "UV_Threshold", FilePath);
+            AddrList[32] = GetIniValue(txtIP.Text, "UV_Duration", FilePath);
+            AddrList[33] = GetIniValue(txtIP.Text, "Voltage_PL_Threshold", FilePath);
+            AddrList[34] = GetIniValue(txtIP.Text, "Voltage_PL_Duration", FilePath);
+            AddrList[35] = GetIniValue(txtIP.Text, "Voltage_UB_Threshold", FilePath);
+            AddrList[36] = GetIniValue(txtIP.Text, "Voltage_UB_Duration", FilePath);
+            AddrList[37] = GetIniValue(txtIP.Text, "OverFREQ", FilePath);
+            AddrList[38] = GetIniValue(txtIP.Text, "POWER_RATE", FilePath);
+            AddrList[39] = GetIniValue(txtIP.Text, "OP_Threshold", FilePath);
+            AddrList[40] = GetIniValue(txtIP.Text, "OP_Duration", FilePath);
+            AddrList[41] = GetIniValue(txtIP.Text, "UP_Threshold", FilePath);
+            AddrList[42] = GetIniValue(txtIP.Text, "UP_Duration", FilePath);
+            AddrList[43] = GetIniValue(txtIP.Text, "OPF_Threshold", FilePath);
+            AddrList[44] = GetIniValue(txtIP.Text, "OPF_Duration", FilePath);
+            AddrList[45] = GetIniValue(txtIP.Text, "UPF_Threshold", FilePath);
+            AddrList[46] = GetIniValue(txtIP.Text, "UPF_Duration", FilePath);
+            AddrList[47] = GetIniValue(txtIP.Text, "Har_FREQ", FilePath);
+            AddrList[48] = GetIniValue(txtIP.Text, "Har_DISPAY", FilePath);
+            AddrList[49] = GetIniValue(txtIP.Text, "Har_DISPAY_Voltage", FilePath);
+        }
         // ------------------------------------------------------------------------
         // Button connect
         // ------------------------------------------------------------------------
         private void btnConnect_Click(object sender, System.EventArgs e)
-		{
-			try
-			{
-				IniSet(txtIP.Text);
-				// Create new modbus master and add event functions
-				MBmaster = new Master(txtIP.Text, 502, true);
-				MBmaster.OnResponseData += new ModbusTCP.Master.ResponseData(MBmaster_OnResponseData);
-				MBmaster.OnException	+= new ModbusTCP.Master.ExceptionData(MBmaster_OnException);
-				// Show additional fields, enable watchdog
-				grpExchange.Visible		= true;
-				grpData.Visible			= true;
-				MessageBox.Show("연결 성공");
-				flag = 1;
-				//loginFlag = 0;
-				iplabel.Text = "IP Status :"+ txtIP.Text;
-				iplabel.Visible = true;
+        {
+            //(new Thread(new ThreadStart(() => // 소켓 통신을 실시간으로 돌리기 위해서 Thread 사용 ! 
+            //{
 
-			}
-			catch(SystemException error)
-			{
-				MessageBox.Show(error.Message);
-			}
-		}
-
-		// ------------------------------------------------------------------------
-		// Athentification 
-		// ------------------------------------------------------------------------
-		private void loginBtn_Click(object sender, EventArgs e)
-		{
-
-			LoginForm dlg = new LoginForm();
-			DialogResult Result = dlg.ShowDialog();
-
-
-			byte[] singleData = new byte[2];
-			if(Result == DialogResult.OK)
+            try
             {
-				ushort ID = 7;
-				byte unit = Convert.ToByte(txtUnit.Text);
-				ushort StartAddress = 718;
-				//data = GetData(1);
-				singleData[0] = 30;
-				singleData[1] = 125;
-				//txtSize.Text = "1";
-				//txtData.Text = data[0].ToString();
+                IniSet(txtIP.Text);
 
-				loginFlag = 1;
-				MBmaster.WriteSingleRegister(ID, unit, StartAddress, singleData);
-			}
-		}
+                string[] section = GetIniSectionNames();
+                foreach (string a in section)
+                {
+                    Console.WriteLine(a);
+                }
+                // Create new modbus master and add event functions
+                MBmaster = new Master(txtIP.Text, 502, true);
+                MBmaster.OnResponseData += new ModbusTCP.Master.ResponseData(MBmaster_OnResponseData);
+                MBmaster.OnException += new ModbusTCP.Master.ExceptionData(MBmaster_OnException);
+                // Show additional fields, enable watchdog
 
-		// ------------------------------------------------------------------------
-		// Read iniFile
-		// ------------------------------------------------------------------------ 
-		private void readBtn_Click(object sender, EventArgs e)
-		{
-			if(flag == 1)
+                if (MBmaster.conflag == 1)
+                {
+                    MessageBox.Show("연결 성공");
+                    grpExchange.Visible = true;
+                    grpData.Visible = true;
+                    flag = 1;
+                    //loginFlag = 0;
+                    iplabel.Text = "IP Status :" + txtIP.Text;
+                    iplabel.Visible = true;
+                    btndiscon.Visible = true;
+                    btnConnect.Visible = false;
+                }
+                else
+                {
+                    MessageBox.Show("연결 상태를 확인 해 주세요");
+                }
+
+            }
+            catch (System.Exception ex)
             {
-				ResizeData();
-				MessageBox.Show("Success");
-			}
-			else MessageBox.Show("연결 상태를 확인 하세요");
+                MessageBox.Show(ex.Message);
+            }
+            //}
+            //))).Start();
+        }
 
-		}
+        // ------------------------------------------------------------------------
+        // Athentification 
+        // ------------------------------------------------------------------------
+        private void loginBtn_Click(object sender, EventArgs e)
+        {
+            if (flag == 1)
+            {
+                LoginForm dlg = new LoginForm();
+                DialogResult Result = dlg.ShowDialog();
+
+
+                byte[] singleData = new byte[2];
+                if (Result == DialogResult.OK)
+                {
+                    ushort ID = 7;
+                    byte unit = Convert.ToByte(txtUnit.Text);
+                    ushort StartAddress = 718;
+                    //data = GetData(1);
+                    singleData[0] = 30;
+                    singleData[1] = 125;
+                    //txtSize.Text = "1";
+                    //txtData.Text = data[0].ToString();
+
+                    loginFlag = 1;
+                    loginBtn.Text = "로그온";
+                    loginBtn.Enabled = false;
+                    MBmaster.WriteSingleRegister(ID, unit, StartAddress, singleData);
+                }
+            }
+            else MessageBox.Show("연결 상태를 확인 해 주세요");
+
+        }
+
+        // ------------------------------------------------------------------------
+        // Read iniFile
+        // ------------------------------------------------------------------------ 
+        private void readBtn_Click(object sender, EventArgs e)
+        {
+            if (flag == 1 && loginFlag == 0)
+            {
+                ResizeData();
+                MessageBox.Show("관리자 인증번호를 입력 해 주세요");
+            }
+
+        }
 
 
 
-		// ------------------------------------------------------------------------
-		// Button read holding register
-		// ------------------------------------------------------------------------
-		private void btnReadHoldReg_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 3;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+        // ------------------------------------------------------------------------
+        // Button read holding register
+        // ------------------------------------------------------------------------
+        private void btnReadHoldReg_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 3;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
-			UInt16 Length		= Convert.ToUInt16(txtSize.Text);
-            
-			MBmaster.ReadHoldingRegister(ID, unit, StartAddress, Length);		
-		}
-		// ------------------------------------------------------------------------
-		// Button write multiple register
-		// ------------------------------------------------------------------------	
-		private void btnWriteMultipleReg_Click(object sender, System.EventArgs e)
-		{
-			if (loginFlag == 1)
+            UInt16 Length = Convert.ToUInt16(txtSize.Text);
+            runflag = 1;
+            btnReadHoldReg.Visible = false;
+            stopbtn.Visible = true;
+            int b = 0;
+            (new Thread(new ThreadStart(() => // 소켓 통신을 실시간으로 돌리기 위해서 Thread 사용 ! 
             {
-				ushort ID = 8;
-				byte unit = Convert.ToByte(txtUnit.Text);
-				ushort StartAddress = ReadStartAdr();
+                while (true)
+                {
+                    Thread.Sleep(100);
+                    try
+                    {
+                        MBmaster.ReadHoldingRegister(ID, unit, StartAddress, Length);
+                    }
+                    catch (Exception a)
+                    {
+                        Console.WriteLine(ID + "-" + unit + "-" + StartAddress + "-" + Length);
+                        Console.WriteLine(a);
+                    }
 
-				data = GetData(Convert.ToByte(txtSize.Text));
-				MBmaster.WriteMultipleRegister(ID, unit, StartAddress, data);
-			}
+                    if (runflag == 0) break;
+
+
+                }
+            }
+            ))).Start();
+
+
+        }
+        // ------------------------------------------------------------------------
+        // Button write multiple register
+        // ------------------------------------------------------------------------	
+        private void btnWriteMultipleReg_Click(object sender, System.EventArgs e)
+        {
+            if (loginFlag == 1)
+            {
+                ushort ID = 8;
+                byte unit = Convert.ToByte(txtUnit.Text);
+                ushort StartAddress = ReadStartAdr();
+
+                data = GetData(Convert.ToByte(txtSize.Text));
+                MBmaster.WriteMultipleRegister(ID, unit, StartAddress, data);
+            }
             else
             {
-				MessageBox.Show("관리자 인증을 해주세요");
+                MessageBox.Show("관리자 인증을 해주세요");
             }
-			
-		}
 
-		// ------------------------------------------------------------------------
-		// Event for response data
-		// ------------------------------------------------------------------------
-		private void MBmaster_OnResponseData(ushort ID, byte unit, byte function, byte[] values)
-		{
+        }
+
+        // ------------------------------------------------------------------------
+        // Event for response data
+        // ------------------------------------------------------------------------
+        private void MBmaster_OnResponseData(ushort ID, byte unit, byte function, byte[] values)
+        {
             // ------------------------------------------------------------------
             // Seperate calling threads
             if (this.InvokeRequired)
@@ -690,269 +873,269 @@ namespace Modbus
                 return;
             }
 
-			// ------------------------------------------------------------------------
-			// Identify requested data
+            // ------------------------------------------------------------------------
+            // Identify requested data
 
-			switch(ID)
-			{
-				
-				case 1:
-					grpData.Text = "Read coils";
-					data = values;
-					
-					ShowAs(null, null);
-				break;
-				case 2:
-					grpData.Text = "Read discrete inputs";
-					data = values;
-					ShowAs(null, null);
-				break;
-				case 3:
-					grpData.Text = "Read holding register";
-					data = values;
-					ShowAs(null, null);
-				break;
-				case 4:
-					grpData.Text = "Read input register";
-					data = values;
-					ShowAs(null, null);
-				break;
-				case 5:
-					grpData.Text = "Write single coil";
-				break;
-				case 6:
-					grpData.Text = "Write multiple coils";
-				break;
-				case 7:
-					grpData.Text = "Write single register";
-				break;
-				case 8:
-					grpData.Text = "Write multiple register";
-				break;
-			}	
-		}
+            switch (ID)
+            {
 
-		// ------------------------------------------------------------------------
-		// Modbus TCP slave exception
-		// ------------------------------------------------------------------------
-		private void MBmaster_OnException(ushort id, byte unit, byte function, byte exception)
-		{
-			string exc = "Modbus says error: ";
-			switch(exception)
-			{
-				case Master.excIllegalFunction: exc += "Illegal function!"; break;
-				case Master.excIllegalDataAdr: exc += "Illegal data adress!"; break;
-				case Master.excIllegalDataVal: exc += "Illegal data value!"; break;
-				case Master.excSlaveDeviceFailure: exc += "Slave device failure!"; break;
-				case Master.excAck: exc += "Acknoledge!"; break;
-				case Master.excGatePathUnavailable: exc += "Gateway path unavailbale!"; break;
-				case Master.excExceptionTimeout: exc += "Slave timed out!"; break;
-				case Master.excExceptionConnectionLost: exc += "Connection is lost!"; break;
-				case Master.excExceptionNotConnected: exc += "Not connected!"; break;
-			}
+                case 1:
+                    grpData.Text = "Read coils";
+                    data = values;
 
-			MessageBox.Show(exc, "Modbus slave exception");
-		}
+                    ShowAs(null, null);
+                    break;
+                case 2:
+                    grpData.Text = "Read discrete inputs";
+                    data = values;
+                    ShowAs(null, null);
+                    break;
+                case 3:
+                    grpData.Text = "Read holding register";
+                    data = values;
+                    ShowAs(null, null);
+                    break;
+                case 4:
+                    grpData.Text = "Read input register";
+                    data = values;
+                    ShowAs(null, null);
+                    break;
+                case 5:
+                    grpData.Text = "Write single coil";
+                    break;
+                case 6:
+                    grpData.Text = "Write multiple coils";
+                    break;
+                case 7:
+                    grpData.Text = "Write single register";
+                    break;
+                case 8:
+                    grpData.Text = "Write multiple register";
+                    break;
+            }
+        }
 
-		// ------------------------------------------------------------------------
-		// Generate new number of text boxes
-		// ------------------------------------------------------------------------
-		private void ResizeData() // Connect 후 라벨과 텍스트박스 생성 해주는 곳 
-		{
-			Console.WriteLine("2");
-			// Create as many textboxes as fit into window
-			grpData.Controls.Clear();
-			int x = 0;
-			int y = 10;
-			int z = 20;
-			while(y < grpData.Size.Width - 100)
-			{
-				labData				= new Label();
-				grpData.Controls.Add(labData);
-				labData.Size		= new System.Drawing.Size(30, 20);
-				labData.Location	= new System.Drawing.Point(y , z);
-				labData.Text		= Convert.ToString(x + 1);
+        // ------------------------------------------------------------------------
+        // Modbus TCP slave exception
+        // ------------------------------------------------------------------------
+        private void MBmaster_OnException(ushort id, byte unit, byte function, byte exception)
+        {
+            string exc = "Modbus says error: ";
+            switch (exception)
+            {
+                case Master.excIllegalFunction: exc += "Illegal function!"; break;
+                case Master.excIllegalDataAdr: exc += "Illegal data adress!"; break;
+                case Master.excIllegalDataVal: exc += "Illegal data value!"; break;
+                case Master.excSlaveDeviceFailure: exc += "Slave device failure!"; break;
+                case Master.excAck: exc += "Acknoledge!"; break;
+                case Master.excGatePathUnavailable: exc += "Gateway path unavailbale!"; break;
+                case Master.excExceptionTimeout: exc += "Slave timed out!"; break;
+                case Master.excExceptionConnectionLost: exc += "Connection is lost!"; break;
+                case Master.excExceptionNotConnected: exc += "Not connected!"; break;
+            }
 
-				txtData				= new TextBox();
-				grpData.Controls.Add(txtData);
-				txtData.Size		= new System.Drawing.Size(50, 20);
-				txtData.Location	= new System.Drawing.Point(y + 30, z);
-				txtData.TextAlign	= System.Windows.Forms.HorizontalAlignment.Right;
-				txtData.Tag			= x;
-				txtData.Name = x + "txt";
+            MessageBox.Show(exc, "Modbus slave exception");
+        }
 
-				if(x < AddrList.Length && loginFlag == 1)
-				txtData.Text = AddrList[x];
+        // ------------------------------------------------------------------------
+        // Generate new number of text boxes
+        // ------------------------------------------------------------------------
+        private void ResizeData() // Connect 후 라벨과 텍스트박스 생성 해주는 곳 
+        {
+            // Create as many textboxes as fit into window
+            grpData.Controls.Clear();
+            int x = 0;
+            int y = 10;
+            int z = 20;
+            while (y < grpData.Size.Width - 100)
+            {
+                labData = new Label();
+                grpData.Controls.Add(labData);
+                labData.Size = new System.Drawing.Size(30, 20);
+                labData.Location = new System.Drawing.Point(y, z);
+                labData.Text = Convert.ToString(x + 1);
 
-				x++;
-				z = z + txtData.Size.Height + 5;
-				if(z > grpData.Size.Height - 40) 
-				{
-					y = y + 100;
-					z = 20;
-				}
-			}
-		}
+                txtData = new TextBox();
+                grpData.Controls.Add(txtData);
+                txtData.Size = new System.Drawing.Size(50, 20);
+                txtData.Location = new System.Drawing.Point(y + 30, z);
+                txtData.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+                txtData.Tag = x;
+                txtData.Name = x + "txt";
 
-		// ------------------------------------------------------------------------
-		// Resize form elements
-		// ------------------------------------------------------------------------
-		private void frmStart_Resize(object sender, System.EventArgs e)
-		{
-			if(grpData.Visible == true) ResizeData();
-		}
+                if (x < AddrList.Length && loginFlag == 1)
+                    txtData.Text = AddrList[x];
+                Console.WriteLine(AddrList[x]);
 
-		// ------------------------------------------------------------------------
-		// Read start address
-		// ------------------------------------------------------------------------
-		private ushort ReadStartAdr()
-		{
-			// Convert hex numbers into decimal
-			if(txtStartAdress.Text.IndexOf("0x", 0, txtStartAdress.Text.Length) == 0) 
-			{
-				string str = txtStartAdress.Text.Replace("0x", "");
-				ushort hex = Convert.ToUInt16(str, 16);
-				return hex;
-			}
-			else 
-			{
-				return Convert.ToUInt16(txtStartAdress.Text);
-			}
-		}
+                x++;
+                z = z + txtData.Size.Height + 5;
+                if (z > grpData.Size.Height - 40)
+                {
+                    y = y + 100;
+                    z = 20;
+                }
+            }
+        }
 
-		// ------------------------------------------------------------------------
-		// Read values from textboxes
-		// ------------------------------------------------------------------------
-		public byte[] GetData(int num)
-		{
-			bool[] bits	= new bool[num];
-			byte[] data	= new Byte[num];
-			int[]  word	= new int[num];
+        // ------------------------------------------------------------------------
+        // Resize form elements
+        // ------------------------------------------------------------------------
+        private void frmStart_Resize(object sender, System.EventArgs e)
+        {
+            if (grpData.Visible == true) ResizeData();
+        }
 
-			// ------------------------------------------------------------------------
-			// Convert data from text boxes
-			foreach(Control ctrl in grpData.Controls) // GetUpperBound length랑 비슷함 근데 length가 +1 많음 
-			{
-				if (ctrl is TextBox)
-				{
-					int x = Convert.ToInt16(ctrl.Tag);
-					if(radBits.Checked)
-					{
-						if((x <= bits.GetUpperBound(0)) && (ctrl.Text != "")) bits[x] = Convert.ToBoolean(Convert.ToByte(ctrl.Text));
-						else break;
-					}
-					if(radBytes.Checked)
-					{
-						if((x <= data.GetUpperBound(0)) && (ctrl.Text != "")) data[x] = Convert.ToByte(ctrl.Text);
-						else break;
-					}
-					if(radWord.Checked) // Word가 체크 되어 있고 
-					{
+        // ------------------------------------------------------------------------
+        // Read start address
+        // ------------------------------------------------------------------------
+        private ushort ReadStartAdr()
+        {
+            // Convert hex numbers into decimal
+            if (txtStartAdress.Text.IndexOf("0x", 0, txtStartAdress.Text.Length) == 0)
+            {
+                string str = txtStartAdress.Text.Replace("0x", "");
+                ushort hex = Convert.ToUInt16(str, 16);
+                return hex;
+            }
+            else
+            {
+                return Convert.ToUInt16(txtStartAdress.Text);
+            }
+        }
+
+        // ------------------------------------------------------------------------
+        // Read values from textboxes
+        // ------------------------------------------------------------------------
+        public byte[] GetData(int num)
+        {
+            bool[] bits = new bool[num];
+            byte[] data = new Byte[num];
+            int[] word = new int[num];
+
+            // ------------------------------------------------------------------------
+            // Convert data from text boxes
+            foreach (Control ctrl in grpData.Controls) // GetUpperBound length랑 비슷함 근데 length가 +1 많음 
+            {
+                if (ctrl is TextBox)
+                {
+                    int x = Convert.ToInt16(ctrl.Tag);
+                    if (radBits.Checked)
+                    {
+                        if ((x <= bits.GetUpperBound(0)) && (ctrl.Text != "")) bits[x] = Convert.ToBoolean(Convert.ToByte(ctrl.Text));
+                        else break;
+                    }
+                    if (radBytes.Checked)
+                    {
+                        if ((x <= data.GetUpperBound(0)) && (ctrl.Text != "")) data[x] = Convert.ToByte(ctrl.Text);
+                        else break;
+                    }
+                    if (radWord.Checked) // Word가 체크 되어 있고 
+                    {
                         if ((x <= data.GetUpperBound(0)) && (ctrl.Text != "")) // data Text가 비어있지 않으면 
-						{
+                        {
                             try { word[x] = Convert.ToInt16(ctrl.Text); }
-                            catch(SystemException) { word[x] = Convert.ToUInt16(ctrl.Text);};
+                            catch (SystemException) { word[x] = Convert.ToUInt16(ctrl.Text); };
                         }
                         else break;
-					}
-				}
-			}
-			if(radBits.Checked)
-			{
-				int numBytes		= (num / 8 + (num % 8 > 0 ? 1 : 0));
-				data				= new Byte[numBytes];
-				BitArray bitArray	= new BitArray(bits);
-				bitArray.CopyTo(data, 0);
-			}
-			if(radWord.Checked)
-			{
-				data = new Byte[num*2]; // byte닌까 2배 곱함 
-				for(int x=0;x<num;x++)
-				{
-					//1.int의 호스트 오더를 네트웍 오더로 바꾼다. - IPAddress.HostToNetworkOrder();
+                    }
+                }
+            }
+            if (radBits.Checked)
+            {
+                int numBytes = (num / 8 + (num % 8 > 0 ? 1 : 0));
+                data = new Byte[numBytes];
+                BitArray bitArray = new BitArray(bits);
+                bitArray.CopyTo(data, 0);
+            }
+            if (radWord.Checked)
+            {
+                data = new Byte[num * 2]; // byte닌까 2배 곱함 
+                for (int x = 0; x < num; x++)
+                {
+                    //1.int의 호스트 오더를 네트웍 오더로 바꾼다. - IPAddress.HostToNetworkOrder();
 
-					//2.int를 Byte Stream으로 바꾼다. - BitConverter.GetBytes();
-					byte[] dat = BitConverter.GetBytes((short) IPAddress.HostToNetworkOrder((short) word[x]));
-					//label5.Text = Convert.ToString(IPAddress.HostToNetworkOrder((short)word[x]) + "-" + dat[1]);
-					
-					data[x*2]	= dat[0];
-					data[x*2+1] = dat[1];
-					
-				}
-			}
-			return data;
-		}
+                    //2.int를 Byte Stream으로 바꾼다. - BitConverter.GetBytes();
+                    byte[] dat = BitConverter.GetBytes((short)IPAddress.HostToNetworkOrder((short)word[x]));
+                    //label5.Text = Convert.ToString(IPAddress.HostToNetworkOrder((short)word[x]) + "-" + dat[1]);
 
-		// ------------------------------------------------------------------------
-		// Show values in selected way
-		// ------------------------------------------------------------------------
-		private void ShowAs(object sender, System.EventArgs e)
-		{
-			RadioButton rad;
-			if(sender is RadioButton)	
-			{
-				rad = (RadioButton) sender;
-				if(rad.Checked == false) return;
-			}
+                    data[x * 2] = dat[0];
+                    data[x * 2 + 1] = dat[1];
 
-			bool[]	bits = new bool[1];
-			int[]	word = new int[1];
+                }
+            }
+            return data;
+        }
 
-			// Convert data to selected data type
-			if(radBits.Checked == true)
-			{
-				BitArray bitArray = new BitArray(data);
-				bits = new bool[bitArray.Count];
-				bitArray.CopyTo(bits, 0);
-			}
-			if(radWord.Checked == true)
-			{
-				if(data.Length < 2) return;
-                int length = data.Length / 2 + Convert.ToInt16(data.Length % 2 > 0);      
+        // ------------------------------------------------------------------------
+        // Show values in selected way
+        // ------------------------------------------------------------------------
+        private void ShowAs(object sender, System.EventArgs e)
+        {
+            RadioButton rad;
+            if (sender is RadioButton)
+            {
+                rad = (RadioButton)sender;
+                if (rad.Checked == false) return;
+            }
+
+            bool[] bits = new bool[1];
+            int[] word = new int[1];
+
+            // Convert data to selected data type
+            if (radBits.Checked == true)
+            {
+                BitArray bitArray = new BitArray(data);
+                bits = new bool[bitArray.Count];
+                bitArray.CopyTo(bits, 0);
+            }
+            if (radWord.Checked == true)
+            {
+                if (data.Length < 2) return;
+                int length = data.Length / 2 + Convert.ToInt16(data.Length % 2 > 0);
                 word = new int[length];
-				for(int x=0;x<length; x+=1)
-				{
-					word[x] = data[x*2] * 256 + data[x*2+1];
-				}
-			}
+                for (int x = 0; x < length; x += 1)
+                {
+                    word[x] = data[x * 2] * 256 + data[x * 2 + 1];
+                }
+            }
 
-			// ------------------------------------------------------------------------
-			// Put new data into text boxes
-			foreach(Control ctrl in grpData.Controls)
-			{
-				if (ctrl is TextBox)
-				{
-					int x = Convert.ToInt16(ctrl.Tag);
-					if(radBits.Checked)
-					{
-						if(x <= bits.GetUpperBound(0)) 
-						{
-							ctrl.Text = Convert.ToByte(bits[x]).ToString();
-							ctrl.Visible = true;
-						}
-						else ctrl.Text = "";
-					}
-					if(radBytes.Checked)
-					{
-						if(x <= data.GetUpperBound(0)) 
-						{
-							ctrl.Text = data[x].ToString();
-							ctrl.Visible = true;
-						}
-						else ctrl.Text = "";
-					}
-					if(radWord.Checked)
-					{
-						if(x <= word.GetUpperBound(0)) 
-						{
-							ctrl.Text = word[x].ToString();
-						
-							ctrl.Visible = true;
-						}
-						else ctrl.Text = "";
-					}
-				}
-			}
-		}
+            // ------------------------------------------------------------------------
+            // Put new data into text boxes
+            foreach (Control ctrl in grpData.Controls)
+            {
+                if (ctrl is TextBox)
+                {
+                    int x = Convert.ToInt16(ctrl.Tag);
+                    if (radBits.Checked)
+                    {
+                        if (x <= bits.GetUpperBound(0))
+                        {
+                            ctrl.Text = Convert.ToByte(bits[x]).ToString();
+                            ctrl.Visible = true;
+                        }
+                        else ctrl.Text = "";
+                    }
+                    if (radBytes.Checked)
+                    {
+                        if (x <= data.GetUpperBound(0))
+                        {
+                            ctrl.Text = data[x].ToString();
+                            ctrl.Visible = true;
+                        }
+                        else ctrl.Text = "";
+                    }
+                    if (radWord.Checked)
+                    {
+                        if (x <= word.GetUpperBound(0))
+                        {
+                            ctrl.Text = word[x].ToString();
+
+                            ctrl.Visible = true;
+                        }
+                        else ctrl.Text = "";
+                    }
+                }
+            }
+        }
     }
 }
