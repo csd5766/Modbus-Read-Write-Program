@@ -84,7 +84,7 @@
             <param name="port">Port number of modbus slave. Usually port 502 is used.</param>
             <param name="no_sync_connection">Disable second connection for synchronous requests</param>
         </member>
-        <member name="M:ModbusTCP.Master.connect(System.String,System.UInt16,System.Boolean)">
+        <member name="M:ModbusTCP.Master.Connect(System.String,System.UInt16,System.Boolean)">
             <summary>Start connection to slave.</summary>
             <param name="ip">IP adress of modbus slave.</param>
             <param name="port">Port number of modbus slave. Usually port 502 is used.</param>

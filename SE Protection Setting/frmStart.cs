@@ -175,6 +175,7 @@ namespace Modbus
             btndiscon.Visible = false;
             stopbtn.Visible = false;
             btnReadHoldReg.Visible = true;
+            runflag = 0;
         }
 
         private Button btndiscon;
@@ -273,8 +274,8 @@ namespace Modbus
             this.loginBtn = new System.Windows.Forms.Button();
             this.iplabel = new System.Windows.Forms.Label();
             this.grpStart = new System.Windows.Forms.GroupBox();
-            this.btndiscon = new System.Windows.Forms.Button();
             this.restartBtn = new System.Windows.Forms.Button();
+            this.btndiscon = new System.Windows.Forms.Button();
             this.grpExchange.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -283,8 +284,8 @@ namespace Modbus
             // 
             // grpData
             // 
-            this.grpData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.grpData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grpData.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.grpData.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
@@ -298,7 +299,7 @@ namespace Modbus
             // 
             // grpExchange
             // 
-            this.grpExchange.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.grpExchange.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grpExchange.Controls.Add(this.stopbtn);
             this.grpExchange.Controls.Add(this.pictureBox2);
@@ -514,20 +515,21 @@ namespace Modbus
             // 
             // iplabel
             // 
+            this.iplabel.AllowDrop = true;
+            this.iplabel.AutoEllipsis = true;
             this.iplabel.AutoSize = true;
             this.iplabel.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.iplabel.ForeColor = System.Drawing.Color.Red;
-            this.iplabel.Location = new System.Drawing.Point(584, -15);
+            this.iplabel.Location = new System.Drawing.Point(606, 8);
             this.iplabel.Name = "iplabel";
             this.iplabel.Size = new System.Drawing.Size(0, 16);
             this.iplabel.TabIndex = 12;
             // 
             // grpStart
             // 
-            this.grpStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.grpStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grpStart.Controls.Add(this.restartBtn);
-            this.grpStart.Controls.Add(this.iplabel);
             this.grpStart.Controls.Add(this.btndiscon);
             this.grpStart.Controls.Add(this.loginBtn);
             this.grpStart.Controls.Add(this.addrBtn);
@@ -542,6 +544,16 @@ namespace Modbus
             this.grpStart.TabStop = false;
             this.grpStart.Text = "Start communication";
             // 
+            // restartBtn
+            // 
+            this.restartBtn.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.restartBtn.Location = new System.Drawing.Point(583, 23);
+            this.restartBtn.Name = "restartBtn";
+            this.restartBtn.Size = new System.Drawing.Size(131, 31);
+            this.restartBtn.TabIndex = 14;
+            this.restartBtn.Text = "Device Restart";
+            this.restartBtn.Click += new System.EventHandler(this.restartBtn_Click);
+            // 
             // btndiscon
             // 
             this.btndiscon.BackColor = System.Drawing.Color.Red;
@@ -555,16 +567,6 @@ namespace Modbus
             this.btndiscon.Visible = false;
             this.btndiscon.Click += new System.EventHandler(this.btndiscon_Click);
             // 
-            // restartBtn
-            // 
-            this.restartBtn.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.restartBtn.Location = new System.Drawing.Point(583, 23);
-            this.restartBtn.Name = "restartBtn";
-            this.restartBtn.Size = new System.Drawing.Size(131, 31);
-            this.restartBtn.TabIndex = 14;
-            this.restartBtn.Text = "Device Restart";
-            this.restartBtn.Click += new System.EventHandler(this.restartBtn_Click);
-            // 
             // frmStart
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -572,6 +574,7 @@ namespace Modbus
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ClientSize = new System.Drawing.Size(833, 419);
             this.Controls.Add(this.grpExchange);
+            this.Controls.Add(this.iplabel);
             this.Controls.Add(this.grpStart);
             this.Controls.Add(this.grpData);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -587,6 +590,7 @@ namespace Modbus
             this.grpStart.ResumeLayout(false);
             this.grpStart.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         #endregion
