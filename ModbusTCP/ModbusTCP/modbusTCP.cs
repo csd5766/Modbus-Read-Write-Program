@@ -140,11 +140,9 @@ namespace ModbusTCP
                 {
                     tcpAsyCl.EndConnect(asyncResult);
                     conflag = 1;
-                    
                 }
                 else
                 {
-                    Console.WriteLine("test");
                     //throw new Exception(string.Format("{0}:{1}에 연결할111 수 없습니다(Timeout).", IPAddress.Parse(ip), port));
                 }
                 tcpAsyCl.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, _timeout);

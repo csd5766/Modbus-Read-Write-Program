@@ -722,15 +722,27 @@ namespace Modbus
                 IniSet(txtIP.Text);
 
                 string[] section = GetIniSectionNames();
-                foreach (string a in section)
+              /*   foreach (string a in section)
                 {
                     Console.WriteLine(a);
-                }
+                }*/
                 // Create new modbus master and add event functions
                 MBmaster = new Master(txtIP.Text, 502, true);
                 MBmaster.OnResponseData += new ModbusTCP.Master.ResponseData(MBmaster_OnResponseData);
                 MBmaster.OnException += new ModbusTCP.Master.ExceptionData(MBmaster_OnException);
                 // Show additional fields, enable watchdog
+
+                byte[] singleData = new byte[2];
+                ushort ID = 7;
+                byte unit = Convert.ToByte(txtUnit.Text);
+                ushort StartAddress = 718;
+                //data = GetData(1);
+                singleData[0] = 30;
+                singleData[1] = 125; //7805
+                                     //txtSize.Text = "1";
+                                     //txtData.Text = data[0].ToString();
+                MBmaster.WriteSingleRegister(ID, unit, StartAddress, singleData);
+
 
                 if (MBmaster.conflag == 1)
                 {
@@ -772,19 +784,9 @@ namespace Modbus
                 byte[] singleData = new byte[2];
                 if (Result == DialogResult.OK)
                 {
-                    ushort ID = 7;
-                    byte unit = Convert.ToByte(txtUnit.Text);
-                    ushort StartAddress = 718;
-                    //data = GetData(1);
-                    singleData[0] = 30;
-                    singleData[1] = 125;
-                    //txtSize.Text = "1";
-                    //txtData.Text = data[0].ToString();
-
                     loginFlag = 1;
                     loginBtn.Text = "로그온";
                     loginBtn.Enabled = false;
-                    MBmaster.WriteSingleRegister(ID, unit, StartAddress, singleData);
                 }
             }
             else MessageBox.Show("연결 상태를 확인 해 주세요");
@@ -799,7 +801,7 @@ namespace Modbus
             if (flag == 1 && loginFlag == 0)
             {
                 ResizeData();
-                MessageBox.Show("관리자 인증번호를 입력 해 주세요");
+                MessageBox.Show("관리자 인증을 해주세요");
             }
 
         }
@@ -969,7 +971,7 @@ namespace Modbus
 
                 if (x < AddrList.Length && loginFlag == 1)
                     txtData.Text = AddrList[x];
-                Console.WriteLine(AddrList[x]);
+                //Console.WriteLine(AddrList[x]);
 
                 x++;
                 z = z + txtData.Size.Height + 5;
